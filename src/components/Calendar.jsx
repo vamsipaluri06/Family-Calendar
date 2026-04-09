@@ -78,8 +78,8 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
     };
   });
 
-  // Combine regular events with meal events
-  const allEvents = [...calendarEvents, ...mealEvents];
+  // Only show regular calendar events (not meals - meals shown on hover only)
+  const allEvents = [...calendarEvents];
 
   const handleDateClick = (info) => {
     onDateSelect(info.dateStr);
@@ -142,24 +142,9 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
 
   // Custom day cell content
   const dayCellContent = (arg) => {
-    const dateStr = arg.date.toISOString().split('T')[0];
-    const dayMeals = MEAL_TYPES.filter(mt => getMeal(dateStr, mt.id));
-    
     return (
       <div className="day-cell-content">
         <span className="day-number">{arg.dayNumberText}</span>
-        {dayMeals.length > 0 && (
-          <div className="meal-dots">
-            {dayMeals.map(mt => (
-              <span 
-                key={mt.id} 
-                className="meal-dot"
-                style={{ backgroundColor: MEAL_COLORS[mt.id] }}
-                title={mt.name}
-              />
-            ))}
-          </div>
-        )}
       </div>
     );
   };
