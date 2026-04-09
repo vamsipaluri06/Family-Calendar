@@ -121,11 +121,10 @@ function EventModal({ event, selectedDate, onClose }) {
       await deleteEvent(event.id, deleteAllRecurring);
       onClose();
     } catch (error) {
-        console.error('Error deleting event:', error);
-        alert('Failed to delete event. Please try again.');
-      }
-      setIsDeleting(false);
+      console.error('Error deleting event:', error);
+      alert('Failed to delete event. Please try again.');
     }
+    setIsDeleting(false);
   };
 
   const handleChange = (e) => {
