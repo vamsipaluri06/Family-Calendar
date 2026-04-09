@@ -111,14 +111,93 @@ export function FamilyProvider({ children }) {
     }
   }, [events, meals, groceryItems, familyMembers, isFirebaseConnected, loading]);
 
+  // Helper function to generate recurring event dates
+  const generateRecurringDates = (startDate, endDate, recurringType) => {
+    const dates = [];
+    let current = new Date(startDate);
+    const end = new Date(endDate);
+    
+    // Add the first date
+    dates.push(new Date(current));
+    
+    while (current < end) {
+      switch (recurringType) {
+        case 'daily':
+          current.setDate(current.getDate() + 1);
+          break;
+        case 'weekly':
+          current.setDate(current.getDate() + 7);
+          break;
+        case 'monthly':
+          current.setMonth(current.getMonth() + 1);
+          break;
+        case 'annually':
+          current.setFullYear(current.getFullYear() + 1);
+          break;
+        default:
+          return dates;
+      }
+      
+      if (current <= end) {
+        dates.push(new Date(current));
+      }
+    }
+    
+    return dates;
+  };
+
   // Event functions
   const addEvent = async (event) => {
-    if (db) {
-      const eventsRef = ref(db, 'events');
-      await push(eventsRef, event);
-    } else {
-      const newEvent = { ...event, id: Date.now().toString() };
-      setEvents(prev => [...prev, newEvent]);
+    const { recurring, recurringEndDate, ...eventBase } = event;
+    
+    // If not recurring or no end date, just add single event
+    if (!recurring || recurring === 'none' || !recurringEndDate) {
+      if (db) {
+        const eventsRef = ref(db, 'events');
+        await push(eventsRef, { ...event, recurring: 'none' });
+      } else {
+        const newEvent = { ...event, id: Date.now().toString(), recurring: 'none' };
+        setEvents(prev => [...prev, newEvent]);
+      }
+      return;
+    }
+    
+    // Generate recurring events
+    const startDateStr = event.start.split('T')[0];
+    const startTime = event.start.includes('T') ? event.start.split('T')[1] : null;
+    const endDateStr = event.end ? event.end.split('T')[0] : startDateStr;
+    const endTime = event.end && event.end.includes('T') ? event.end.split('T')[1] : null;
+    
+    // Calculate days difference between start and end
+    const daysDiff = Math.round((new Date(endDateStr) - new Date(startDateStr)) / (1000 * 60 * 60 * 24));
+    
+    const recurringDates = generateRecurringDates(startDateStr, recurringEndDate, recurring);
+    const recurringGroupId = Date.now().toString(); // Group ID to link recurring events
+    
+    for (const date of recurringDates) {
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // Calculate end date for this occurrence
+      const endOccurrence = new Date(date);
+      endOccurrence.setDate(endOccurrence.getDate() + daysDiff);
+      const endDateOccurrence = endOccurrence.toISOString().split('T')[0];
+      
+      const newEventData = {
+        ...eventBase,
+        start: startTime ? `${dateStr}T${startTime}` : dateStr,
+        end: endTime ? `${endDateOccurrence}T${endTime}` : endDateOccurrence,
+        recurring: recurring,
+        recurringGroupId: recurringGroupId,
+        recurringEndDate: recurringEndDate
+      };
+      
+      if (db) {
+        const eventsRef = ref(db, 'events');
+        await push(eventsRef, newEventData);
+      } else {
+        const newEvent = { ...newEventData, id: `${Date.now()}_${dateStr}` };
+        setEvents(prev => [...prev, newEvent]);
+      }
     }
   };
 
@@ -131,12 +210,33 @@ export function FamilyProvider({ children }) {
     }
   };
 
-  const deleteEvent = async (id) => {
-    if (db) {
-      const eventRef = ref(db, `events/${id}`);
-      await remove(eventRef);
+  const deleteEvent = async (id, deleteAllRecurring = false) => {
+    // Find the event to check if it's part of a recurring group
+    const eventToDelete = events.find(e => e.id === id);
+    
+    if (deleteAllRecurring && eventToDelete?.recurringGroupId) {
+      // Delete all events in the recurring group
+      const groupId = eventToDelete.recurringGroupId;
+      const eventsToDelete = events.filter(e => e.recurringGroupId === groupId);
+      
+      for (const event of eventsToDelete) {
+        if (db) {
+          const eventRef = ref(db, `events/${event.id}`);
+          await remove(eventRef);
+        }
+      }
+      
+      if (!db) {
+        setEvents(prev => prev.filter(e => e.recurringGroupId !== groupId));
+      }
     } else {
-      setEvents(prev => prev.filter(e => e.id !== id));
+      // Delete only this single event
+      if (db) {
+        const eventRef = ref(db, `events/${id}`);
+        await remove(eventRef);
+      } else {
+        setEvents(prev => prev.filter(e => e.id !== id));
+      }
     }
   };
 

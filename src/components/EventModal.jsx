@@ -4,6 +4,13 @@ import { useFamily } from '../context/FamilyContext';
 function EventModal({ event, selectedDate, onClose }) {
   const { addEvent, updateEvent, deleteEvent, FAMILY_MEMBERS } = useFamily();
   
+  // Calculate default recurring end date (3 months from now)
+  const getDefaultRecurringEndDate = () => {
+    const date = new Date();
+    date.setMonth(date.getMonth() + 3);
+    return date.toISOString().split('T')[0];
+  };
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -14,6 +21,7 @@ function EventModal({ event, selectedDate, onClose }) {
     allDay: false,
     memberIds: [FAMILY_MEMBERS[0].id], // Array for multiple family members
     recurring: 'none', // 'none', 'daily', 'weekly', 'monthly', 'annually'
+    recurringEndDate: getDefaultRecurringEndDate(), // End date for recurring events
     reminder: '30' // minutes before
   });
 
@@ -49,6 +57,7 @@ function EventModal({ event, selectedDate, onClose }) {
         allDay: event.allDay || false,
         memberIds: memberIds,
         recurring: event.recurring || 'none',
+        recurringEndDate: event.recurringEndDate || getDefaultRecurringEndDate(),
         reminder: event.reminder || '30'
       });
     }
@@ -75,6 +84,7 @@ function EventModal({ event, selectedDate, onClose }) {
       memberIds: formData.memberIds, // Array of selected members
       memberId: formData.memberIds[0], // Keep first one for backward compatibility
       recurring: formData.recurring,
+      recurringEndDate: formData.recurring !== 'none' ? formData.recurringEndDate : null,
       reminder: formData.reminder
     };
 
@@ -92,12 +102,25 @@ function EventModal({ event, selectedDate, onClose }) {
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      setIsDeleting(true);
-      try {
-        await deleteEvent(event.id);
-        onClose();
-      } catch (error) {
+    let deleteAllRecurring = false;
+    
+    // If this is a recurring event, ask if user wants to delete all occurrences
+    if (event.recurringGroupId) {
+      const choice = window.confirm(
+        'This is a recurring event.\n\n' +
+        'Click OK to delete ALL occurrences of this event.\n' +
+        'Click Cancel to delete only this single occurrence.'
+      );
+      deleteAllRecurring = choice;
+    } else if (!window.confirm('Are you sure you want to delete this event?')) {
+      return;
+    }
+    
+    setIsDeleting(true);
+    try {
+      await deleteEvent(event.id, deleteAllRecurring);
+      onClose();
+    } catch (error) {
         console.error('Error deleting event:', error);
         alert('Failed to delete event. Please try again.');
       }
@@ -259,6 +282,22 @@ function EventModal({ event, selectedDate, onClose }) {
               <option value="annually">Annually</option>
             </select>
           </div>
+
+          {formData.recurring !== 'none' && (
+            <div className="form-group">
+              <label htmlFor="recurringEndDate">Repeat Until</label>
+              <input
+                type="date"
+                id="recurringEndDate"
+                name="recurringEndDate"
+                value={formData.recurringEndDate}
+                onChange={handleChange}
+                min={formData.start}
+                required
+              />
+              <p className="form-hint">Events will be created until this date</p>
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="reminder">Reminder</label>
