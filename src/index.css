@@ -93,15 +93,36 @@ body {
 .menu-btn {
   background: none;
   border: none;
-  font-size: 20px;
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
   color: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menu-btn:hover {
   background: var(--bg-hover);
+}
+
+.grid-icon {
+  display: grid;
+  grid-template-columns: repeat(3, 6px);
+  grid-template-rows: repeat(3, 6px);
+  gap: 3px;
+}
+
+.grid-icon span {
+  width: 6px;
+  height: 6px;
+  background-color: var(--secondary);
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.menu-btn:hover .grid-icon span {
+  background-color: var(--primary);
 }
 
 .logo {

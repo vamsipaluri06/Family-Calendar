@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Calendar from './components/Calendar';
 import MealPlanner from './components/MealPlanner';
 import GroceryList from './components/GroceryList';
@@ -16,7 +16,19 @@ function App() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [editingMeal, setEditingMeal] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Start with sidebar closed on mobile (width <= 768px)
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
+
+  // Close sidebar on mobile when window resizes
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const { loading, isFirebaseConnected, FAMILY_MEMBERS } = useFamily();
 
@@ -61,8 +73,13 @@ function App() {
           <button 
             className="menu-btn"
             onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Toggle sidebar"
           >
-            ☰
+            <span className="grid-icon">
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+            </span>
           </button>
           <div className="logo">
             <span className="logo-icon">📅</span>
