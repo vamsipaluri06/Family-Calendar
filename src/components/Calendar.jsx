@@ -78,8 +78,8 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
     };
   });
 
-  // Only show regular calendar events (not meals - meals shown on hover only)
-  const allEvents = [...calendarEvents];
+  // Combine calendar events and meal events
+  const allEvents = [...calendarEvents, ...mealEvents];
 
   const handleDateClick = (info) => {
     onDateSelect(info.dateStr);
