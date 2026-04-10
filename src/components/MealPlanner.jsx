@@ -9,13 +9,12 @@ const formatDateLocal = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
+function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal, viewMode = 'week' }) {
   const { MEAL_TYPES, getMeal, generateGroceryFromMeals } = useFamily();
-  const [viewMode, setViewMode] = useState('week'); // Default to week view
   const [generatingGrocery, setGeneratingGrocery] = useState(false);
   
-  // Check if mobile (for conditional rendering)
-  const isMobile = window.innerWidth <= 768;
+  // Determine view: use prop viewMode directly
+  const showTodayOnly = viewMode === 'today';
 
   // Get week dates based on selected date
   const weekDates = useMemo(() => {
@@ -64,23 +63,9 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
   return (
     <div className="meal-planner">
       <div className="meal-planner-header">
-        <h2>🍽️ {isMobile ? "Today's Meals" : "Meal Planner"}</h2>
-        {!isMobile && (
+        <h2>🍽️ {showTodayOnly ? "Today's Meals" : "Meal Planner"}</h2>
+        {!showTodayOnly && (
           <div className="meal-planner-controls">
-            <div className="view-toggle">
-              <button 
-                className={viewMode === 'day' ? 'active' : ''}
-                onClick={() => setViewMode('day')}
-              >
-                Day
-              </button>
-              <button 
-                className={viewMode === 'week' ? 'active' : ''}
-                onClick={() => setViewMode('week')}
-              >
-                Week
-              </button>
-            </div>
             <button 
               className="btn btn-secondary"
               onClick={handleGenerateGroceryList}
@@ -92,8 +77,8 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
         )}
       </div>
 
-      {/* Week Navigation - hide on mobile */}
-      {!isMobile && (
+      {/* Week Navigation - hide when showing today only */}
+      {!showTodayOnly && (
         <div className="week-navigation">
           <button className="nav-arrow" onClick={() => navigateWeek(-1)}>←</button>
           <span className="week-range">
@@ -108,8 +93,8 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
         </div>
       )}
 
-      {/* Mobile Today View */}
-      {isMobile ? (
+      {/* Today View (from mobile nav) */}
+      {showTodayOnly ? (
         <div className="meal-grid day-view mobile-today-view">
           <div className="mobile-date-display">
             {new Date().toLocaleDateString('en-US', { 
@@ -156,7 +141,7 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
             })}
           </div>
         </div>
-      ) : viewMode === 'week' ? (
+      ) : (
         /* Week View */
         <div className="meal-grid week-view">
           {/* Header Row */}
@@ -212,83 +197,6 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
               })}
             </div>
           ))}
-        </div>
-      ) : (
-        /* Day View */
-        <div className="meal-grid day-view">
-          <div className="day-view-header">
-            <button onClick={() => {
-              const prev = new Date(selectedDate + 'T12:00:00');
-              prev.setDate(prev.getDate() - 1);
-              onDateSelect(formatDateLocal(prev));
-            }}>←</button>
-            <h3>
-              {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </h3>
-            <button onClick={() => {
-              const next = new Date(selectedDate + 'T12:00:00');
-              next.setDate(next.getDate() + 1);
-              onDateSelect(formatDateLocal(next));
-            }}>→</button>
-          </div>
-
-          <div className="day-meals">
-            {MEAL_TYPES.map(mealType => {
-              const meal = getMeal(selectedDate, mealType.id);
-              return (
-                <div 
-                  key={mealType.id} 
-                  className={`day-meal-card ${meal ? 'has-meal' : ''}`}
-                  onClick={() => meal 
-                    ? onEditMeal(meal, mealType.id)
-                    : onAddMeal(mealType.id)
-                  }
-                >
-                  <div className="meal-card-header">
-                    <span className="meal-icon">{mealType.icon}</span>
-                    <span className="meal-type-name">{mealType.name}</span>
-                    <span className="meal-time">{mealType.time}</span>
-                  </div>
-                  
-                  {meal ? (
-                    <div className="meal-card-content">
-                      <h4>{meal.name}</h4>
-                      {meal.description && (
-                        <p className="meal-description">{meal.description}</p>
-                      )}
-                      {meal.ingredients && meal.ingredients.length > 0 && (
-                        <div className="meal-ingredients">
-                          <strong>Ingredients:</strong>
-                          <ul>
-                            {meal.ingredients.slice(0, 5).map((ing, idx) => (
-                              <li key={idx}>{ing}</li>
-                            ))}
-                            {meal.ingredients.length > 5 && (
-                              <li className="more">+{meal.ingredients.length - 5} more</li>
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                      {meal.recipe && (
-                        <div className="meal-recipe-preview">
-                          <strong>Recipe:</strong> {meal.recipe.slice(0, 100)}...
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="meal-card-empty">
-                      <span className="add-icon">+</span>
-                      <span>Add {mealType.name}</span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
         </div>
       )}
 

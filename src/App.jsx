@@ -21,6 +21,7 @@ const formatDateLocal = (date) => {
 
 function App() {
   const [activeView, setActiveView] = useState('calendar');
+  const [mealViewMode, setMealViewMode] = useState('week'); // 'week' or 'today'
   const [selectedDate, setSelectedDate] = useState(formatDateLocal(new Date()));
   const [showEventModal, setShowEventModal] = useState(false);
   const [showMealModal, setShowMealModal] = useState(false);
@@ -207,6 +208,7 @@ function App() {
             <button 
               className={`nav-item ${activeView === 'meals' ? 'active' : ''}`}
               onClick={() => {
+                setMealViewMode('week');
                 setActiveView('meals');
                 if (window.innerWidth <= 768) setSidebarOpen(false);
               }}
@@ -257,6 +259,7 @@ function App() {
             <button 
               className="quick-link"
               onClick={() => {
+                setMealViewMode('week');
                 setActiveView('meals');
               }}
             >
@@ -281,6 +284,7 @@ function App() {
               onDateSelect={handleDateSelect}
               onAddMeal={handleAddMeal}
               onEditMeal={handleEditMeal}
+              viewMode={mealViewMode}
             />
           )}
           {activeView === 'grocery' && (
@@ -320,7 +324,10 @@ function App() {
         </button>
         <button 
           className={`mobile-nav-btn ${activeView === 'meals' ? 'active' : ''}`}
-          onClick={() => setActiveView('meals')}
+          onClick={() => {
+            setMealViewMode('today');
+            setActiveView('meals');
+          }}
         >
           <span className="mobile-nav-icon">🍽️</span>
           <span className="mobile-nav-label">Meals</span>
