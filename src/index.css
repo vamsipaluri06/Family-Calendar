@@ -144,15 +144,24 @@ body {
 .header-center {
   flex: 1;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  gap: 4px;
 }
 
-.date-picker {
-  padding: 8px 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
+.live-clock {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+
+.live-date {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .header-right {
@@ -496,6 +505,121 @@ body {
 .no-events {
   color: var(--text-muted);
   font-style: italic;
+  padding: 16px;
+  text-align: center;
+  background: var(--bg-primary);
+  border-radius: 8px;
+}
+
+.date-events h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+}
+
+/* Full Event Detail Card */
+.event-item-full {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border-left: 4px solid var(--primary);
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.event-item-full:hover {
+  background: var(--bg-hover);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+.event-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.event-title-large {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.recurring-badge {
+  font-size: 11px;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.event-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.event-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.info-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.info-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.info-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.member-tag {
+  font-size: 12px;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.event-description-full {
+  background: var(--bg-secondary);
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+.event-description-full .info-text {
+  line-height: 1.5;
+}
+
+.event-click-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.event-item-full:hover .event-click-hint {
+  opacity: 1;
 }
 
 .date-meals h4 {

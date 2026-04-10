@@ -256,6 +256,20 @@ export function FamilyProvider({ children }) {
     return meals[key] || null;
   };
 
+  const deleteMeal = async (date, mealType) => {
+    const key = `${date}_${mealType}`;
+    if (db) {
+      const mealRef = ref(db, `meals/${key}`);
+      await remove(mealRef);
+    } else {
+      setMeals(prev => {
+        const newMeals = { ...prev };
+        delete newMeals[key];
+        return newMeals;
+      });
+    }
+  };
+
   // Grocery functions
   const addGroceryItem = async (item) => {
     if (db) {
@@ -368,6 +382,7 @@ export function FamilyProvider({ children }) {
       // Meal functions
       setMeal,
       getMeal,
+      deleteMeal,
       
       // Grocery functions
       addGroceryItem,

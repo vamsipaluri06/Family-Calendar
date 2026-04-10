@@ -19,6 +19,17 @@ function App() {
   // Start with sidebar closed on mobile (width <= 768px)
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
 
+  // Live clock state
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Close sidebar on mobile when window resizes
   useEffect(() => {
     const handleResize = () => {
@@ -46,8 +57,8 @@ function App() {
     setShowEventModal(true);
   };
 
-  const handleAddMeal = (mealType) => {
-    setEditingMeal({ date: selectedDate, mealType, isNew: true });
+  const handleAddMeal = (mealType, date) => {
+    setEditingMeal({ date: date || selectedDate, mealType, isNew: true });
     setShowMealModal(true);
   };
 
@@ -88,12 +99,22 @@ function App() {
         </div>
         
         <div className="header-center">
-          <input 
-            type="date" 
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="date-picker"
-          />
+          <div className="live-clock">
+            {currentTime.toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit', 
+              second: '2-digit',
+              hour12: true 
+            })}
+          </div>
+          <div className="live-date">
+            {currentTime.toLocaleDateString('en-US', { 
+              weekday: 'long',
+              month: 'long', 
+              day: 'numeric',
+              year: 'numeric'
+            })}
+          </div>
         </div>
         
         <div className="header-right">

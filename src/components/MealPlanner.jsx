@@ -83,9 +83,9 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
       <div className="week-navigation">
         <button className="nav-arrow" onClick={() => navigateWeek(-1)}>←</button>
         <span className="week-range">
-          {new Date(weekDates[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          {new Date(weekDates[0] + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           {' - '}
-          {new Date(weekDates[6]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          {new Date(weekDates[6] + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         </span>
         <button className="nav-arrow" onClick={() => navigateWeek(1)}>→</button>
         <button className="today-btn" onClick={() => onDateSelect(new Date().toISOString().split('T')[0])}>
@@ -129,7 +129,7 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
                     className={`meal-cell ${meal ? 'has-meal' : ''}`}
                     onClick={() => meal 
                       ? onEditMeal(meal, mealType.id)
-                      : onAddMeal(mealType.id)
+                      : onAddMeal(mealType.id, dateStr)
                     }
                   >
                     {meal ? (
@@ -160,14 +160,14 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
               onDateSelect(prev.toISOString().split('T')[0]);
             }}>←</button>
             <h3>
-              {new Date(selectedDate).toLocaleDateString('en-US', { 
+              {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 month: 'long', 
                 day: 'numeric' 
               })}
             </h3>
             <button onClick={() => {
-              const next = new Date(selectedDate);
+              const next = new Date(selectedDate + 'T12:00:00');
               next.setDate(next.getDate() + 1);
               onDateSelect(next.toISOString().split('T')[0]);
             }}>→</button>

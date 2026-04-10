@@ -226,9 +226,9 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
         )}
       </div>
 
-      {/* Selected Date Summary */}
+      {/* Selected Date Summary - Full Details */}
       <div className="date-summary">
-        <h3>📆 {new Date(selectedDate).toLocaleDateString('en-US', { 
+        <h3>📆 {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { 
           weekday: 'long', 
           year: 'numeric', 
           month: 'long', 
@@ -236,6 +236,7 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
         })}</h3>
         
         <div className="date-events">
+          <h4>📋 Events</h4>
           {events
             .filter(e => e.start.startsWith(selectedDate))
             .map(event => {
@@ -246,44 +247,66 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
                 .filter(Boolean);
               const firstMember = members[0];
               
+              const startTime = event.allDay 
+                ? 'All Day' 
+                : new Date(event.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+              const endTime = event.end && !event.allDay
+                ? new Date(event.end).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+                : null;
+              
               return (
                 <div 
                   key={event.id} 
-                  className="event-item"
+                  className="event-item-full"
                   onClick={() => onEventClick(event)}
-                  style={{ borderLeftColor: firstMember?.color }}
+                  style={{ borderLeftColor: firstMember?.color || '#4285f4' }}
                 >
-                  <div className="event-time">
-                    {event.allDay ? 'All Day' : new Date(event.start).toLocaleTimeString('en-US', {
-                      hour: 'numeric',
-                      minute: '2-digit'
-                    })}
+                  <div className="event-header-row">
+                    <div className="event-title-large">{event.title}</div>
+                    {event.recurring && event.recurring !== 'none' && (
+                      <span className="recurring-badge">🔄 {event.recurring}</span>
+                    )}
                   </div>
-                  <div className="event-details">
-                    <div className="event-title">{event.title}</div>
+                  
+                  <div className="event-info-grid">
+                    <div className="event-info-item">
+                      <span className="info-icon">🕐</span>
+                      <span className="info-text">
+                        {startTime}{endTime ? ` - ${endTime}` : ''}
+                      </span>
+                    </div>
+                    
                     {members.length > 0 && (
-                      <div className="event-members">
-                        {members.map(m => (
-                          <span 
-                            key={m.id} 
-                            className="event-member-badge"
-                            style={{ backgroundColor: m.color }}
-                            title={m.name}
-                          >
-                            {m.name.charAt(0)}
-                          </span>
-                        ))}
-                        <span className="event-member-names">
-                          {members.map(m => m.name).join(', ')}
-                        </span>
+                      <div className="event-info-item">
+                        <span className="info-icon">👥</span>
+                        <div className="info-members">
+                          {members.map(m => (
+                            <span 
+                              key={m.id} 
+                              className="member-tag"
+                              style={{ backgroundColor: m.color }}
+                            >
+                              {m.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {event.description && (
+                      <div className="event-info-item event-description-full">
+                        <span className="info-icon">📝</span>
+                        <span className="info-text">{event.description}</span>
                       </div>
                     )}
                   </div>
+                  
+                  <div className="event-click-hint">Click to edit</div>
                 </div>
               );
             })}
           {events.filter(e => e.start.startsWith(selectedDate)).length === 0 && (
-            <p className="no-events">No events scheduled</p>
+            <p className="no-events">No events scheduled for this day</p>
           )}
         </div>
 

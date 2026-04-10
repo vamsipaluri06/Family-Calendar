@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFamily } from '../context/FamilyContext';
 
 function MealModal({ meal, selectedDate, onClose }) {
-  const { setMeal, MEAL_TYPES } = useFamily();
+  const { setMeal, deleteMeal, MEAL_TYPES } = useFamily();
   
   const mealType = MEAL_TYPES.find(mt => mt.id === meal?.mealType);
   
@@ -14,7 +14,9 @@ function MealModal({ meal, selectedDate, onClose }) {
     prepTime: '',
     cookTime: '',
     servings: '3',
-    notes: ''
+    notes: '',
+    likes: 0,
+    dislikes: 0
   });
 
   const [ingredientInput, setIngredientInput] = useState('');
@@ -29,7 +31,9 @@ function MealModal({ meal, selectedDate, onClose }) {
         prepTime: meal.prepTime || '',
         cookTime: meal.cookTime || '',
         servings: meal.servings || '3',
-        notes: meal.notes || ''
+        notes: meal.notes || '',
+        likes: meal.likes || 0,
+        dislikes: meal.dislikes || 0
       });
     }
   }, [meal]);
@@ -98,7 +102,7 @@ function MealModal({ meal, selectedDate, onClose }) {
             <h2>{meal?.isNew ? `Add ${mealType?.name}` : `Edit ${mealType?.name}`}</h2>
           </div>
           <div className="meal-date">
-            {new Date(meal?.date || selectedDate).toLocaleDateString('en-US', {
+            {new Date((meal?.date || selectedDate) + 'T12:00:00').toLocaleDateString('en-US', {
               weekday: 'long',
               month: 'short',
               day: 'numeric'
@@ -106,6 +110,31 @@ function MealModal({ meal, selectedDate, onClose }) {
           </div>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
+
+        {/* Rating section for existing meals */}
+        {!meal?.isNew && (
+          <div className="meal-actions-bar">
+            <div className="rating-section">
+              <span className="rating-label">Rate this meal:</span>
+              <button
+                type="button"
+                className="rating-btn thumbs-up"
+                onClick={() => setFormData(prev => ({ ...prev, likes: prev.likes + 1 }))}
+                title="Like"
+              >
+                👍 <span className="rating-count">{formData.likes}</span>
+              </button>
+              <button
+                type="button"
+                className="rating-btn thumbs-down"
+                onClick={() => setFormData(prev => ({ ...prev, dislikes: prev.dislikes + 1 }))}
+                title="Dislike"
+              >
+                👎 <span className="rating-count">{formData.dislikes}</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
@@ -260,6 +289,29 @@ function MealModal({ meal, selectedDate, onClose }) {
               {meal?.isNew ? 'Add Meal' : 'Save Changes'}
             </button>
           </div>
+
+          {/* Delete Meal - at the end */}
+          {!meal?.isNew && (
+            <div className="delete-meal-section">
+              <button
+                type="button"
+                className="delete-meal-btn"
+                onClick={async () => {
+                  if (window.confirm('Are you sure you want to delete this meal?')) {
+                    try {
+                      await deleteMeal(meal.date, meal.mealType);
+                      onClose();
+                    } catch (error) {
+                      console.error('Error deleting meal:', error);
+                      alert('Failed to delete meal. Please try again.');
+                    }
+                  }
+                }}
+              >
+                🗑️ Delete Meal
+              </button>
+            </div>
+          )}
         </form>
       </div>
     </div>
