@@ -1,9 +1,11 @@
 /* Meal Planner Styles */
 .meal-planner {
-  background: var(--bg-primary);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
   padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .meal-planner-header {
@@ -333,10 +335,12 @@
 
 /* Grocery List Styles */
 .grocery-list {
-  background: var(--bg-primary);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
   padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .grocery-header {
@@ -926,7 +930,10 @@
   gap: 12px;
 }
 
-/* Responsive */
+/* ========================================
+   MOBILE RESPONSIVE STYLES - APP.CSS
+   ======================================== */
+
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -940,29 +947,344 @@
     transform: translateX(-100%);
   }
   
-  .meal-grid-header,
-  .meal-row {
-    grid-template-columns: 80px repeat(7, 80px);
+  /* Meal Planner Mobile */
+  .meal-planner {
+    padding: 16px;
+    border-radius: 12px;
   }
   
   .meal-planner-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .meal-planner-header h2 {
+    font-size: 18px;
+  }
+  
+  .meal-planner-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .view-toggle button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .week-navigation button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .meal-grid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .meal-grid-header,
+  .meal-row {
+    grid-template-columns: 70px repeat(7, 70px);
+    min-width: 560px;
+  }
+  
+  .day-column,
+  .meal-item {
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+  
+  .meal-content .meal-name {
+    font-size: 11px;
+  }
+  
+  /* Day View Mobile */
+  .day-view {
+    padding: 12px;
+  }
+  
+  .day-view-header h3 {
+    font-size: 16px;
+  }
+  
+  .day-meal-card {
+    padding: 12px;
+  }
+  
+  .day-meal-icon {
+    font-size: 24px;
+  }
+  
+  .day-meal-label {
+    font-size: 12px;
+  }
+  
+  /* Grocery List Mobile */
+  .grocery-list {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  
+  .grocery-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .grocery-header h2 {
+    font-size: 18px;
+  }
+  
+  .grocery-stats {
+    flex-wrap: wrap;
+    gap: 8px;
   }
   
   .grocery-controls {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 12px;
   }
   
   .sort-controls {
     margin-left: 0;
+    flex-wrap: wrap;
+  }
+  
+  .grocery-item {
+    padding: 12px;
+  }
+  
+  .item-name {
+    font-size: 14px;
+  }
+  
+  .item-quantity {
+    font-size: 12px;
+  }
+  
+  /* Modal Mobile */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
   }
   
   .modal {
     max-width: 100%;
-    max-height: 100%;
-    border-radius: 0;
+    max-height: 90vh;
+    border-radius: 16px 16px 0 0;
+    margin: 0;
+  }
+  
+  .modal-header {
+    padding: 16px;
+  }
+  
+  .modal-header h2 {
+    font-size: 16px;
+  }
+  
+  .modal-form {
+    padding: 16px;
+  }
+  
+  .form-group label {
+    font-size: 12px;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 12px;
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modal-actions button {
+    width: 100%;
+  }
+  
+  .action-right {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  /* Meal Popup Mobile */
+  .meal-popup {
+    position: fixed;
+    left: 50% !important;
+    top: auto !important;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    min-width: auto;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
+  .popup-header {
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+  }
+  
+  .popup-meals {
+    padding: 0 16px 16px;
+  }
+  
+  .popup-meal-row {
+    padding: 12px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .popup-votes {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  
+  /* Rating Section Mobile */
+  .rating-section-avatars {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .rating-votes {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  
+  .rating-vote-group {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Meal Planner Extra Small */
+  .meal-planner {
+    padding: 12px;
+  }
+  
+  .meal-planner-header h2 {
+    font-size: 16px;
+  }
+  
+  .meal-grid-header,
+  .meal-row {
+    grid-template-columns: 60px repeat(7, 55px);
+    min-width: 445px;
+  }
+  
+  .day-column,
+  .meal-item {
+    padding: 4px 2px;
+    font-size: 10px;
+  }
+  
+  /* Day View Extra Small */
+  .day-meal-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .day-meal-card {
+    padding: 10px;
+  }
+  
+  /* Grocery Extra Small */
+  .grocery-list {
+    padding: 12px;
+  }
+  
+  .grocery-item {
+    padding: 10px;
+  }
+  
+  /* Modal Extra Small */
+  .modal {
+    max-height: 95vh;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .modal-header {
+    padding: 12px;
+  }
+  
+  .modal-form {
+    padding: 12px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .time-row .form-group {
+    flex: 1;
+    width: 100%;
+  }
+  
+  /* Member picker mobile */
+  .member-picker {
+    gap: 6px;
+  }
+  
+  .member-chip {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  /* Current user info mobile */
+  .current-user-info {
+    padding: 2px 8px 2px 2px;
+  }
+  
+  .current-user-avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+  
+  .current-user-name {
+    display: none;
+  }
+  
+  .logout-btn {
+    padding: 6px;
+    font-size: 16px;
+  }
+  
+  .settings-btn {
+    padding: 6px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (hover: none) and (pointer: coarse) {
+  .meal-item,
+  .grocery-item,
+  .nav-item,
+  .member-chip {
+    min-height: 44px;
+  }
+  
+  .vote-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .form-group input,
+  .form-group select {
+    min-height: 48px;
   }
 }
 
@@ -1315,6 +1637,24 @@
   cursor: not-allowed;
 }
 
+/* User's own vote highlight */
+.vote-btn.voted {
+  opacity: 1 !important;
+  box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor;
+}
+
+.vote-btn.like.voted {
+  background: #28a745;
+  border-color: #1e7e34;
+  color: white;
+}
+
+.vote-btn.dislike.voted {
+  background: #dc3545;
+  border-color: #bd2130;
+  color: white;
+}
+
 .vote-avatars {
   display: flex;
   gap: 2px;
@@ -1478,4 +1818,431 @@
     rgba(186, 225, 255, 0.2)
   ) !important;
   box-shadow: inset 0 0 0 2px rgba(66, 133, 244, 0.5);
+}
+
+/* Login Page Styles */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, 
+    #667eea 0%, 
+    #764ba2 50%,
+    #f093fb 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Floating decorative elements */
+.login-page::before,
+.login-page::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  animation: float 6s ease-in-out infinite;
+}
+
+.login-page::before {
+  width: 300px;
+  height: 300px;
+  top: -100px;
+  left: -100px;
+}
+
+.login-page::after {
+  width: 200px;
+  height: 200px;
+  bottom: -50px;
+  right: -50px;
+  animation-delay: -3s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+.login-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 48px 40px;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-header {
+  margin-bottom: 32px;
+}
+
+.login-icon {
+  font-size: 56px;
+  display: block;
+  margin-bottom: 16px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.login-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.login-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Member selection grid */
+.member-selection {
+  margin-bottom: 24px;
+}
+
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 16px;
+}
+
+.member-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(145deg, #f8f9fa, #ffffff);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.member-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.25);
+  border-color: #667eea;
+  background: white;
+}
+
+.member-avatar-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.member-card:hover .member-avatar-large {
+  transform: scale(1.1);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+}
+
+.member-name-card {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* PIN Entry Screen */
+.pin-entry {
+  animation: fadeSlideUp 0.4s ease-out;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  margin-bottom: 20px;
+}
+
+.back-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.selected-member-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: white;
+  margin: 0 auto 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: popIn 0.3s ease-out;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.welcome-name {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.pin-prompt {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.pin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pin-input {
+  width: 100%;
+  height: 56px;
+  text-align: center;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.pin-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+}
+
+.pin-input::placeholder {
+  letter-spacing: 8px;
+  color: #ccc;
+}
+
+.pin-error {
+  color: #dc3545;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+}
+
+.login-btn {
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.login-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+.login-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-btn:disabled {
+  background: #ccc;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.login-footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.login-footer p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Header user info and logout */
+.current-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.current-user-avatar {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+}
+
+.current-user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.settings-btn {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.settings-btn:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  transform: scale(1.1);
+}
+
+@media (max-width: 480px) {
+  .login-page::before,
+  .login-page::after {
+    display: none;
+  }
+  
+  .login-container {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+  
+  .login-icon {
+    font-size: 48px;
+  }
+  
+  .login-header h1 {
+    font-size: 26px;
+  }
+  
+  .member-grid {
+    gap: 12px;
+  }
+  
+  .member-card {
+    padding: 16px 12px;
+  }
+  
+  .member-avatar-large {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
+  
+  .selected-member-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+  }
+  
+  .welcome-name {
+    font-size: 20px;
+  }
+  
+  .pin-input {
+    height: 50px;
+    font-size: 26px;
+    letter-spacing: 10px;
+  }
+  
+  .current-user-name {
+    display: none;
+  }
 }

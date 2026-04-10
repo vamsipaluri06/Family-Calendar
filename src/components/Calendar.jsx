@@ -4,6 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useFamily } from '../context/FamilyContext';
+import { useAuth } from '../context/AuthContext';
 
 // Helper to format date as YYYY-MM-DD in local time
 const formatDateLocal = (date) => {
@@ -24,46 +25,47 @@ const MEAL_COLORS = {
 function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
   const calendarRef = useRef(null);
   const { events, FAMILY_MEMBERS, MEAL_TYPES, getMeal, setMeal } = useFamily();
+  const { currentUser } = useAuth();
   const [mealPopupDate, setMealPopupDate] = useState(null);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
-  const [votingMeal, setVotingMeal] = useState(null); // { mealType, voteType: 'like' | 'dislike' }
 
-  // Handle member vote
-  const handleMemberVote = async (memberId) => {
-    if (!votingMeal || !mealPopupDate) return;
+  // Handle vote for logged-in user
+  const handleVote = async (mealType, voteType) => {
+    if (!mealPopupDate || !currentUser) return;
     
-    const meal = getMeal(mealPopupDate, votingMeal.mealType);
+    const meal = getMeal(mealPopupDate, mealType);
     if (!meal) return;
 
     const likedBy = meal.likedBy || [];
     const dislikedBy = meal.dislikedBy || [];
+    const memberId = currentUser.id;
     
-    // Check if member already voted
+    // Check if user already voted
     if (likedBy.includes(memberId) || dislikedBy.includes(memberId)) {
       return;
     }
 
-    if (votingMeal.voteType === 'like') {
-      await setMeal(mealPopupDate, votingMeal.mealType, { 
+    if (voteType === 'like') {
+      await setMeal(mealPopupDate, mealType, { 
         ...meal, 
         likedBy: [...likedBy, memberId],
         likes: (meal.likes || 0) + 1
       });
     } else {
-      await setMeal(mealPopupDate, votingMeal.mealType, { 
+      await setMeal(mealPopupDate, mealType, { 
         ...meal, 
         dislikedBy: [...dislikedBy, memberId],
         dislikes: (meal.dislikes || 0) + 1
       });
     }
-    setVotingMeal(null);
   };
 
-  // Get members who haven't voted yet
-  const getUnvotedMembers = (meal) => {
-    const likedBy = meal?.likedBy || [];
-    const dislikedBy = meal?.dislikedBy || [];
-    return FAMILY_MEMBERS.filter(m => !likedBy.includes(m.id) && !dislikedBy.includes(m.id));
+  // Check if current user has voted
+  const hasCurrentUserVoted = (meal) => {
+    if (!currentUser || !meal) return false;
+    const likedBy = meal.likedBy || [];
+    const dislikedBy = meal.dislikedBy || [];
+    return likedBy.includes(currentUser.id) || dislikedBy.includes(currentUser.id);
   };
 
   // Navigate to selected date when it changes
@@ -250,8 +252,9 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
               {getMealsForDate(mealPopupDate).map(item => {
                 const likedBy = item.meal?.likedBy || [];
                 const dislikedBy = item.meal?.dislikedBy || [];
-                const allVoted = likedBy.length + dislikedBy.length >= FAMILY_MEMBERS.length;
-                const isVotingThis = votingMeal?.mealType === item.id;
+                const userVoted = hasCurrentUserVoted(item.meal);
+                const userLiked = likedBy.includes(currentUser?.id);
+                const userDisliked = dislikedBy.includes(currentUser?.id);
                 
                 return (
                   <div 
@@ -268,14 +271,10 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
                       {/* Like section */}
                       <div className="vote-section">
                         <button 
-                          className={`vote-btn like ${allVoted ? 'disabled' : ''} ${isVotingThis && votingMeal.voteType === 'like' ? 'active' : ''}`}
-                          onClick={() => !allVoted && setVotingMeal(
-                            isVotingThis && votingMeal.voteType === 'like' 
-                              ? null 
-                              : { mealType: item.id, voteType: 'like' }
-                          )}
-                          disabled={allVoted}
-                          title={allVoted ? 'All voted' : 'Click to vote'}
+                          className={`vote-btn like ${userVoted ? 'disabled' : ''} ${userLiked ? 'active voted' : ''}`}
+                          onClick={() => !userVoted && handleVote(item.id, 'like')}
+                          disabled={userVoted}
+                          title={userVoted ? (userLiked ? 'You liked this' : 'You already voted') : 'Like this meal'}
                         >
                           👍
                         </button>
@@ -299,14 +298,10 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
                       {/* Dislike section */}
                       <div className="vote-section">
                         <button 
-                          className={`vote-btn dislike ${allVoted ? 'disabled' : ''} ${isVotingThis && votingMeal.voteType === 'dislike' ? 'active' : ''}`}
-                          onClick={() => !allVoted && setVotingMeal(
-                            isVotingThis && votingMeal.voteType === 'dislike' 
-                              ? null 
-                              : { mealType: item.id, voteType: 'dislike' }
-                          )}
-                          disabled={allVoted}
-                          title={allVoted ? 'All voted' : 'Click to vote'}
+                          className={`vote-btn dislike ${userVoted ? 'disabled' : ''} ${userDisliked ? 'active voted' : ''}`}
+                          onClick={() => !userVoted && handleVote(item.id, 'dislike')}
+                          disabled={userVoted}
+                          title={userVoted ? (userDisliked ? 'You disliked this' : 'You already voted') : 'Dislike this meal'}
                         >
                           👎
                         </button>
@@ -327,30 +322,6 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
                         </div>
                       </div>
                     </div>
-                    
-                    {/* Member selection dropdown */}
-                    {isVotingThis && (
-                      <div className="member-vote-picker">
-                        <span className="picker-label">Who's voting?</span>
-                        <div className="picker-members">
-                          {getUnvotedMembers(item.meal).map(member => (
-                            <button
-                              key={member.id}
-                              className="picker-member"
-                              style={{ backgroundColor: member.color }}
-                              onClick={() => handleMemberVote(member.id)}
-                              title={member.name}
-                            >
-                              {member.name.charAt(0)}
-                            </button>
-                          ))}
-                          {getUnvotedMembers(item.meal).length === 0 && (
-                            <span className="no-members">All voted!</span>
-                          )}
-                        </div>
-                        <button className="picker-cancel" onClick={() => setVotingMeal(null)}>Cancel</button>
-                      </div>
-                    )}
                   </div>
                 );
               })}
