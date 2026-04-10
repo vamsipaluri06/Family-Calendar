@@ -23,6 +23,7 @@ export function FamilyProvider({ children }) {
   const [events, setEvents] = useState([]);
   const [meals, setMeals] = useState({});
   const [groceryItems, setGroceryItems] = useState([]);
+  const [storeExpenses, setStoreExpenses] = useState([]);
   const [familyMembers, setFamilyMembers] = useState(DEFAULT_FAMILY_MEMBERS);
   const [loading, setLoading] = useState(true);
   const [isFirebaseConnected, setIsFirebaseConnected] = useState(false);
@@ -79,11 +80,27 @@ export function FamilyProvider({ children }) {
         setLoading(false);
       });
 
+      // Listen to store expenses
+      const expensesRef = ref(db, 'storeExpenses');
+      const unsubExpenses = onValue(expensesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const expensesArray = Object.entries(data).map(([id, expense]) => ({
+            ...expense,
+            id
+          }));
+          setStoreExpenses(expensesArray);
+        } else {
+          setStoreExpenses([]);
+        }
+      });
+
       return () => {
         unsubEvents();
         unsubMeals();
         unsubGrocery();
         unsubFamily();
+        unsubExpenses();
       };
     } else {
       // Fallback to localStorage
@@ -91,11 +108,13 @@ export function FamilyProvider({ children }) {
       const savedMeals = localStorage.getItem('familyCalendarMeals');
       const savedGrocery = localStorage.getItem('familyCalendarGrocery');
       const savedFamily = localStorage.getItem('familyCalendarMembers');
+      const savedExpenses = localStorage.getItem('familyCalendarExpenses');
       
       if (savedEvents) setEvents(JSON.parse(savedEvents));
       if (savedMeals) setMeals(JSON.parse(savedMeals));
       if (savedGrocery) setGroceryItems(JSON.parse(savedGrocery));
       if (savedFamily) setFamilyMembers(JSON.parse(savedFamily));
+      if (savedExpenses) setStoreExpenses(JSON.parse(savedExpenses));
       
       setLoading(false);
     }
@@ -108,8 +127,9 @@ export function FamilyProvider({ children }) {
       localStorage.setItem('familyCalendarMeals', JSON.stringify(meals));
       localStorage.setItem('familyCalendarGrocery', JSON.stringify(groceryItems));
       localStorage.setItem('familyCalendarMembers', JSON.stringify(familyMembers));
+      localStorage.setItem('familyCalendarExpenses', JSON.stringify(storeExpenses));
     }
-  }, [events, meals, groceryItems, familyMembers, isFirebaseConnected, loading]);
+  }, [events, meals, groceryItems, familyMembers, storeExpenses, isFirebaseConnected, loading]);
 
   // Helper function to generate recurring event dates
   const generateRecurringDates = (startDate, endDate, recurringType) => {
@@ -396,12 +416,75 @@ export function FamilyProvider({ children }) {
     }
   };
 
+  // Store expense functions
+  const addStoreExpense = async (expense) => {
+    // expense: { storeId, amount, date, note? }
+    if (db) {
+      const expensesRef = ref(db, 'storeExpenses');
+      await push(expensesRef, { ...expense, createdAt: Date.now() });
+    } else {
+      const newExpense = { ...expense, id: Date.now().toString(), createdAt: Date.now() };
+      setStoreExpenses(prev => [...prev, newExpense]);
+    }
+  };
+
+  const updateStoreExpense = async (id, updates) => {
+    if (db) {
+      const expenseRef = ref(db, `storeExpenses/${id}`);
+      await update(expenseRef, updates);
+    } else {
+      setStoreExpenses(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
+    }
+  };
+
+  const removeStoreExpense = async (id) => {
+    if (db) {
+      const expenseRef = ref(db, `storeExpenses/${id}`);
+      await remove(expenseRef);
+    } else {
+      setStoreExpenses(prev => prev.filter(e => e.id !== id));
+    }
+  };
+
+  const getStoreExpenses = (storeId, year, month) => {
+    return storeExpenses.filter(e => {
+      if (e.storeId !== storeId) return false;
+      const expenseDate = new Date(e.date);
+      if (year && expenseDate.getFullYear() !== year) return false;
+      if (month !== undefined && expenseDate.getMonth() !== month) return false;
+      return true;
+    });
+  };
+
+  const getMonthlyTotal = (storeId, year, month) => {
+    const expenses = getStoreExpenses(storeId, year, month);
+    return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  };
+
+  const getAnnualTotal = (storeId, year) => {
+    const expenses = storeExpenses.filter(e => {
+      if (e.storeId !== storeId) return false;
+      const expenseDate = new Date(e.date);
+      return expenseDate.getFullYear() === year;
+    });
+    return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  };
+
+  const getAllStoresAnnualTotal = (year) => {
+    const expenses = storeExpenses.filter(e => {
+      const expenseDate = new Date(e.date);
+      return expenseDate.getFullYear() === year;
+    });
+    return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  };
+
   return (
     <FamilyContext.Provider value={{
       // Data
       events,
       meals,
       groceryItems,
+      storeExpenses,
       loading,
       isFirebaseConnected,
       
@@ -426,6 +509,15 @@ export function FamilyProvider({ children }) {
       updateGroceryItem,
       generateGroceryFromMeals,
       clearCheckedGroceryItems,
+
+      // Store expense functions
+      addStoreExpense,
+      updateStoreExpense,
+      removeStoreExpense,
+      getStoreExpenses,
+      getMonthlyTotal,
+      getAnnualTotal,
+      getAllStoresAnnualTotal,
 
       // Family member functions
       updateFamilyMember,
