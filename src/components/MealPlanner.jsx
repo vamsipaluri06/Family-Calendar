@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useFamily } from '../context/FamilyContext';
 
 // Helper to format date as YYYY-MM-DD in local time
@@ -11,31 +11,11 @@ const formatDateLocal = (date) => {
 
 function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
   const { MEAL_TYPES, getMeal, generateGroceryFromMeals } = useFamily();
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [viewMode, setViewMode] = useState(isMobile ? 'day' : 'week');
+  const [viewMode, setViewMode] = useState('week'); // Default to week view
   const [generatingGrocery, setGeneratingGrocery] = useState(false);
-
-  // Check for mobile on resize
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth <= 768;
-      setIsMobile(mobile);
-      if (mobile) {
-        setViewMode('day');
-        // Also set to today on mobile
-        onDateSelect(formatDateLocal(new Date()));
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [onDateSelect]);
-
-  // On initial mount, if mobile, show today
-  useEffect(() => {
-    if (isMobile) {
-      onDateSelect(formatDateLocal(new Date()));
-    }
-  }, []);
+  
+  // Check if mobile (for conditional rendering)
+  const isMobile = window.innerWidth <= 768;
 
   // Get week dates based on selected date
   const weekDates = useMemo(() => {

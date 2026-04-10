@@ -1259,6 +1259,97 @@
   }
 }
 
+/* Mobile Meal Planner (tablets and phones) */
+@media (max-width: 768px) {
+  /* Mobile Today View */
+  .mobile-today-view {
+    padding: 16px;
+  }
+
+  .mobile-date-display {
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    padding: 12px 0;
+    color: var(--primary);
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-today-view .day-meals {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mobile-today-view .day-meal-card {
+    padding: 16px;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .mobile-today-view .day-meal-card.has-meal {
+    border-left: 4px solid var(--primary);
+    background: #f0f9ff;
+  }
+
+  .mobile-today-view .meal-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .mobile-today-view .meal-icon {
+    font-size: 24px;
+  }
+
+  .mobile-today-view .meal-type-name {
+    font-weight: 600;
+    font-size: 16px;
+    flex: 1;
+  }
+
+  .mobile-today-view .meal-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .mobile-today-view .meal-card-content h4 {
+    font-size: 15px;
+    margin: 0;
+    color: var(--text-primary);
+  }
+
+  .mobile-today-view .meal-card-empty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  .mobile-today-view .add-icon {
+    font-size: 20px;
+    color: var(--primary);
+  }
+
+  /* Hide meal planner week controls on mobile */
+  .meal-planner-controls {
+    display: none;
+  }
+
+  .week-navigation {
+    display: none;
+  }
+}
+
 @media (max-width: 480px) {
   .store-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1859,94 +1950,6 @@
   
   .meal-content .meal-name {
     font-size: 11px;
-  }
-  
-  /* Mobile Today View */
-  .mobile-today-view {
-    padding: 16px;
-  }
-
-  .mobile-date-display {
-    font-size: 18px;
-    font-weight: 600;
-    text-align: center;
-    padding: 12px 0;
-    color: var(--primary);
-    background: var(--bg-secondary);
-    border-radius: 12px;
-    margin-bottom: 16px;
-  }
-
-  .mobile-today-view .day-meals {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .mobile-today-view .day-meal-card {
-    padding: 16px;
-    border-radius: 12px;
-    background: white;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
-
-  .mobile-today-view .day-meal-card.has-meal {
-    border-left: 4px solid var(--primary);
-    background: #f0f9ff;
-  }
-
-  .mobile-today-view .meal-card-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-
-  .mobile-today-view .meal-icon {
-    font-size: 24px;
-  }
-
-  .mobile-today-view .meal-type-name {
-    font-weight: 600;
-    font-size: 16px;
-    flex: 1;
-  }
-
-  .mobile-today-view .meal-time {
-    font-size: 12px;
-    color: var(--text-secondary);
-    background: var(--bg-secondary);
-    padding: 4px 8px;
-    border-radius: 4px;
-  }
-
-  .mobile-today-view .meal-card-content h4 {
-    font-size: 15px;
-    margin: 0;
-    color: var(--text-primary);
-  }
-
-  .mobile-today-view .meal-card-empty {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-secondary);
-    font-size: 14px;
-  }
-
-  .mobile-today-view .add-icon {
-    font-size: 20px;
-    color: var(--primary);
-  }
-
-  /* Hide meal planner controls on mobile */
-  .meal-planner-controls {
-    display: none;
-  }
-
-  .week-navigation {
-    display: none;
   }
   
   /* Day View Mobile */
