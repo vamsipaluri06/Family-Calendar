@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useFamily } from '../context/FamilyContext';
 
 // Helper to format date as YYYY-MM-DD in local time
@@ -11,8 +11,31 @@ const formatDateLocal = (date) => {
 
 function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
   const { MEAL_TYPES, getMeal, generateGroceryFromMeals } = useFamily();
-  const [viewMode, setViewMode] = useState('week'); // 'day' or 'week'
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [viewMode, setViewMode] = useState(isMobile ? 'day' : 'week');
   const [generatingGrocery, setGeneratingGrocery] = useState(false);
+
+  // Check for mobile on resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setViewMode('day');
+        // Also set to today on mobile
+        onDateSelect(formatDateLocal(new Date()));
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [onDateSelect]);
+
+  // On initial mount, if mobile, show today
+  useEffect(() => {
+    if (isMobile) {
+      onDateSelect(formatDateLocal(new Date()));
+    }
+  }, []);
 
   // Get week dates based on selected date
   const weekDates = useMemo(() => {
@@ -61,47 +84,99 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
   return (
     <div className="meal-planner">
       <div className="meal-planner-header">
-        <h2>🍽️ Meal Planner</h2>
-        <div className="meal-planner-controls">
-          <div className="view-toggle">
+        <h2>🍽️ {isMobile ? "Today's Meals" : "Meal Planner"}</h2>
+        {!isMobile && (
+          <div className="meal-planner-controls">
+            <div className="view-toggle">
+              <button 
+                className={viewMode === 'day' ? 'active' : ''}
+                onClick={() => setViewMode('day')}
+              >
+                Day
+              </button>
+              <button 
+                className={viewMode === 'week' ? 'active' : ''}
+                onClick={() => setViewMode('week')}
+              >
+                Week
+              </button>
+            </div>
             <button 
-              className={viewMode === 'day' ? 'active' : ''}
-              onClick={() => setViewMode('day')}
+              className="btn btn-secondary"
+              onClick={handleGenerateGroceryList}
+              disabled={generatingGrocery}
             >
-              Day
-            </button>
-            <button 
-              className={viewMode === 'week' ? 'active' : ''}
-              onClick={() => setViewMode('week')}
-            >
-              Week
+              {generatingGrocery ? '⏳ Generating...' : '🛒 Generate Grocery List'}
             </button>
           </div>
-          <button 
-            className="btn btn-secondary"
-            onClick={handleGenerateGroceryList}
-            disabled={generatingGrocery}
-          >
-            {generatingGrocery ? '⏳ Generating...' : '🛒 Generate Grocery List'}
+        )}
+      </div>
+
+      {/* Week Navigation - hide on mobile */}
+      {!isMobile && (
+        <div className="week-navigation">
+          <button className="nav-arrow" onClick={() => navigateWeek(-1)}>←</button>
+          <span className="week-range">
+            {new Date(weekDates[0] + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            {' - '}
+            {new Date(weekDates[6] + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </span>
+          <button className="nav-arrow" onClick={() => navigateWeek(1)}>→</button>
+          <button className="today-btn" onClick={() => onDateSelect(formatDateLocal(new Date()))}>
+            Today
           </button>
         </div>
-      </div>
+      )}
 
-      {/* Week Navigation */}
-      <div className="week-navigation">
-        <button className="nav-arrow" onClick={() => navigateWeek(-1)}>←</button>
-        <span className="week-range">
-          {new Date(weekDates[0] + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-          {' - '}
-          {new Date(weekDates[6] + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-        </span>
-        <button className="nav-arrow" onClick={() => navigateWeek(1)}>→</button>
-        <button className="today-btn" onClick={() => onDateSelect(formatDateLocal(new Date()))}>
-          Today
-        </button>
-      </div>
+      {/* Mobile Today View */}
+      {isMobile ? (
+        <div className="meal-grid day-view mobile-today-view">
+          <div className="mobile-date-display">
+            {new Date().toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </div>
 
-      {viewMode === 'week' ? (
+          <div className="day-meals">
+            {MEAL_TYPES.map(mealType => {
+              const today = formatDateLocal(new Date());
+              const meal = getMeal(today, mealType.id);
+              return (
+                <div 
+                  key={mealType.id} 
+                  className={`day-meal-card ${meal ? 'has-meal' : ''}`}
+                  onClick={() => meal 
+                    ? onEditMeal(meal, mealType.id)
+                    : onAddMeal(mealType.id, today)
+                  }
+                >
+                  <div className="meal-card-header">
+                    <span className="meal-icon">{mealType.icon}</span>
+                    <span className="meal-type-name">{mealType.name}</span>
+                    <span className="meal-time">{mealType.time}</span>
+                  </div>
+                  
+                  {meal ? (
+                    <div className="meal-card-content">
+                      <h4>{meal.name}</h4>
+                      {meal.description && (
+                        <p className="meal-description">{meal.description}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="meal-card-empty">
+                      <span className="add-icon">+</span>
+                      <span>Add {mealType.name}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : viewMode === 'week' ? (
         /* Week View */
         <div className="meal-grid week-view">
           {/* Header Row */}
