@@ -1,6 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useFamily } from '../context/FamilyContext';
 
+// Helper to format date as YYYY-MM-DD in local time
+const formatDateLocal = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
   const { MEAL_TYPES, getMeal, generateGroceryFromMeals } = useFamily();
   const [viewMode, setViewMode] = useState('week'); // 'day' or 'week'
@@ -9,7 +17,7 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
   // Get week dates based on selected date
   const weekDates = useMemo(() => {
     const dates = [];
-    const selected = new Date(selectedDate);
+    const selected = new Date(selectedDate + 'T12:00:00'); // Use noon to avoid timezone issues
     const dayOfWeek = selected.getDay();
     const startOfWeek = new Date(selected);
     startOfWeek.setDate(selected.getDate() - dayOfWeek);
@@ -17,7 +25,7 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek);
       date.setDate(startOfWeek.getDate() + i);
-      dates.push(date.toISOString().split('T')[0]);
+      dates.push(formatDateLocal(date));
     }
     return dates;
   }, [selectedDate]);
@@ -35,17 +43,17 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
   };
 
   const navigateWeek = (direction) => {
-    const current = new Date(selectedDate);
+    const current = new Date(selectedDate + 'T12:00:00');
     current.setDate(current.getDate() + (direction * 7));
-    onDateSelect(current.toISOString().split('T')[0]);
+    onDateSelect(formatDateLocal(current));
   };
 
   const formatDayHeader = (dateStr) => {
-    const date = new Date(dateStr);
+    const date = new Date(dateStr + 'T12:00:00');
     return {
       day: date.toLocaleDateString('en-US', { weekday: 'short' }),
       date: date.getDate(),
-      isToday: dateStr === new Date().toISOString().split('T')[0],
+      isToday: dateStr === formatDateLocal(new Date()),
       isSelected: dateStr === selectedDate
     };
   };
@@ -88,7 +96,7 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
           {new Date(weekDates[6] + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         </span>
         <button className="nav-arrow" onClick={() => navigateWeek(1)}>→</button>
-        <button className="today-btn" onClick={() => onDateSelect(new Date().toISOString().split('T')[0])}>
+        <button className="today-btn" onClick={() => onDateSelect(formatDateLocal(new Date()))}>
           Today
         </button>
       </div>
@@ -155,9 +163,9 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
         <div className="meal-grid day-view">
           <div className="day-view-header">
             <button onClick={() => {
-              const prev = new Date(selectedDate);
+              const prev = new Date(selectedDate + 'T12:00:00');
               prev.setDate(prev.getDate() - 1);
-              onDateSelect(prev.toISOString().split('T')[0]);
+              onDateSelect(formatDateLocal(prev));
             }}>←</button>
             <h3>
               {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { 
@@ -169,7 +177,7 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal }) {
             <button onClick={() => {
               const next = new Date(selectedDate + 'T12:00:00');
               next.setDate(next.getDate() + 1);
-              onDateSelect(next.toISOString().split('T')[0]);
+              onDateSelect(formatDateLocal(next));
             }}>→</button>
           </div>
 

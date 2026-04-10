@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFamily } from '../context/FamilyContext';
 
 function MealModal({ meal, selectedDate, onClose }) {
-  const { setMeal, deleteMeal, MEAL_TYPES } = useFamily();
+  const { setMeal, deleteMeal, MEAL_TYPES, FAMILY_MEMBERS } = useFamily();
   
   const mealType = MEAL_TYPES.find(mt => mt.id === meal?.mealType);
   
@@ -15,11 +15,12 @@ function MealModal({ meal, selectedDate, onClose }) {
     cookTime: '',
     servings: '3',
     notes: '',
-    likes: 0,
-    dislikes: 0
+    likedBy: [],
+    dislikedBy: []
   });
 
   const [ingredientInput, setIngredientInput] = useState('');
+  const [votingMode, setVotingMode] = useState(null); // 'like' or 'dislike'
 
   useEffect(() => {
     if (meal && !meal.isNew) {
@@ -32,11 +33,41 @@ function MealModal({ meal, selectedDate, onClose }) {
         cookTime: meal.cookTime || '',
         servings: meal.servings || '3',
         notes: meal.notes || '',
-        likes: meal.likes || 0,
-        dislikes: meal.dislikes || 0
+        likedBy: meal.likedBy || [],
+        dislikedBy: meal.dislikedBy || []
       });
     }
   }, [meal]);
+
+  // Handle member vote
+  const handleMemberVote = (memberId) => {
+    if (!votingMode) return;
+    
+    // Check if member already voted
+    if (formData.likedBy.includes(memberId) || formData.dislikedBy.includes(memberId)) {
+      return;
+    }
+
+    if (votingMode === 'like') {
+      setFormData(prev => ({ 
+        ...prev, 
+        likedBy: [...prev.likedBy, memberId]
+      }));
+    } else {
+      setFormData(prev => ({ 
+        ...prev, 
+        dislikedBy: [...prev.dislikedBy, memberId]
+      }));
+    }
+    setVotingMode(null);
+  };
+
+  // Get members who haven't voted yet
+  const getUnvotedMembers = () => {
+    return FAMILY_MEMBERS.filter(m => 
+      !formData.likedBy.includes(m.id) && !formData.dislikedBy.includes(m.id)
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,6 +75,9 @@ function MealModal({ meal, selectedDate, onClose }) {
     const mealData = {
       ...formData,
       date: meal.date || selectedDate,
+      // Keep backward compatibility
+      likes: formData.likedBy.length,
+      dislikes: formData.dislikedBy.length
     };
 
     try {
@@ -114,24 +148,91 @@ function MealModal({ meal, selectedDate, onClose }) {
         {/* Rating section for existing meals */}
         {!meal?.isNew && (
           <div className="meal-actions-bar">
-            <div className="rating-section">
-              <span className="rating-label">Rate this meal:</span>
-              <button
-                type="button"
-                className="rating-btn thumbs-up"
-                onClick={() => setFormData(prev => ({ ...prev, likes: prev.likes + 1 }))}
-                title="Like"
-              >
-                👍 <span className="rating-count">{formData.likes}</span>
-              </button>
-              <button
-                type="button"
-                className="rating-btn thumbs-down"
-                onClick={() => setFormData(prev => ({ ...prev, dislikes: prev.dislikes + 1 }))}
-                title="Dislike"
-              >
-                👎 <span className="rating-count">{formData.dislikes}</span>
-              </button>
+            <div className="rating-section-avatars">
+              <span className="rating-label">
+                Rate this meal ({formData.likedBy.length + formData.dislikedBy.length}/{FAMILY_MEMBERS.length} voted):
+              </span>
+              
+              <div className="rating-votes">
+                {/* Like section */}
+                <div className="rating-vote-group">
+                  <button
+                    type="button"
+                    className={`vote-btn like ${formData.likedBy.length + formData.dislikedBy.length >= FAMILY_MEMBERS.length ? 'disabled' : ''} ${votingMode === 'like' ? 'active' : ''}`}
+                    onClick={() => setVotingMode(votingMode === 'like' ? null : 'like')}
+                    disabled={formData.likedBy.length + formData.dislikedBy.length >= FAMILY_MEMBERS.length}
+                  >
+                    👍
+                  </button>
+                  <div className="rating-avatars">
+                    {formData.likedBy.map(memberId => {
+                      const member = FAMILY_MEMBERS.find(m => m.id === memberId);
+                      return member ? (
+                        <span 
+                          key={memberId}
+                          className="rating-avatar"
+                          style={{ backgroundColor: member.color }}
+                          title={member.name}
+                        >
+                          {member.name.charAt(0)}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+                
+                {/* Dislike section */}
+                <div className="rating-vote-group">
+                  <button
+                    type="button"
+                    className={`vote-btn dislike ${formData.likedBy.length + formData.dislikedBy.length >= FAMILY_MEMBERS.length ? 'disabled' : ''} ${votingMode === 'dislike' ? 'active' : ''}`}
+                    onClick={() => setVotingMode(votingMode === 'dislike' ? null : 'dislike')}
+                    disabled={formData.likedBy.length + formData.dislikedBy.length >= FAMILY_MEMBERS.length}
+                  >
+                    👎
+                  </button>
+                  <div className="rating-avatars">
+                    {formData.dislikedBy.map(memberId => {
+                      const member = FAMILY_MEMBERS.find(m => m.id === memberId);
+                      return member ? (
+                        <span 
+                          key={memberId}
+                          className="rating-avatar"
+                          style={{ backgroundColor: member.color }}
+                          title={member.name}
+                        >
+                          {member.name.charAt(0)}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Member picker */}
+              {votingMode && (
+                <div className="member-vote-picker modal-picker">
+                  <span className="picker-label">Who's voting?</span>
+                  <div className="picker-members">
+                    {getUnvotedMembers().map(member => (
+                      <button
+                        key={member.id}
+                        type="button"
+                        className="picker-member"
+                        style={{ backgroundColor: member.color }}
+                        onClick={() => handleMemberVote(member.id)}
+                        title={member.name}
+                      >
+                        {member.name.charAt(0)}
+                      </button>
+                    ))}
+                    {getUnvotedMembers().length === 0 && (
+                      <span className="no-members">All voted!</span>
+                    )}
+                  </div>
+                  <button type="button" className="picker-cancel" onClick={() => setVotingMode(null)}>Cancel</button>
+                </div>
+              )}
             </div>
           </div>
         )}

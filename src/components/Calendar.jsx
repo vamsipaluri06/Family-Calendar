@@ -5,6 +5,14 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useFamily } from '../context/FamilyContext';
 
+// Helper to format date as YYYY-MM-DD in local time
+const formatDateLocal = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 // Meal colors - pleasant rainbow palette
 const MEAL_COLORS = {
   breakfast: '#FF9AA2', // Soft coral/pink
@@ -15,9 +23,48 @@ const MEAL_COLORS = {
 
 function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
   const calendarRef = useRef(null);
-  const { events, FAMILY_MEMBERS, MEAL_TYPES, getMeal, meals } = useFamily();
-  const [hoveredDate, setHoveredDate] = useState(null);
-  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
+  const { events, FAMILY_MEMBERS, MEAL_TYPES, getMeal, setMeal } = useFamily();
+  const [mealPopupDate, setMealPopupDate] = useState(null);
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+  const [votingMeal, setVotingMeal] = useState(null); // { mealType, voteType: 'like' | 'dislike' }
+
+  // Handle member vote
+  const handleMemberVote = async (memberId) => {
+    if (!votingMeal || !mealPopupDate) return;
+    
+    const meal = getMeal(mealPopupDate, votingMeal.mealType);
+    if (!meal) return;
+
+    const likedBy = meal.likedBy || [];
+    const dislikedBy = meal.dislikedBy || [];
+    
+    // Check if member already voted
+    if (likedBy.includes(memberId) || dislikedBy.includes(memberId)) {
+      return;
+    }
+
+    if (votingMeal.voteType === 'like') {
+      await setMeal(mealPopupDate, votingMeal.mealType, { 
+        ...meal, 
+        likedBy: [...likedBy, memberId],
+        likes: (meal.likes || 0) + 1
+      });
+    } else {
+      await setMeal(mealPopupDate, votingMeal.mealType, { 
+        ...meal, 
+        dislikedBy: [...dislikedBy, memberId],
+        dislikes: (meal.dislikes || 0) + 1
+      });
+    }
+    setVotingMeal(null);
+  };
+
+  // Get members who haven't voted yet
+  const getUnvotedMembers = (meal) => {
+    const likedBy = meal?.likedBy || [];
+    const dislikedBy = meal?.dislikedBy || [];
+    return FAMILY_MEMBERS.filter(m => !likedBy.includes(m.id) && !dislikedBy.includes(m.id));
+  };
 
   // Navigate to selected date when it changes
   useEffect(() => {
@@ -27,32 +74,20 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
     }
   }, [selectedDate]);
 
-  // Generate meal events for every day that has meals
-  const mealEvents = [];
-  Object.keys(meals).forEach(key => {
-    const meal = meals[key];
-    if (meal && meal.name) {
-      const mealType = MEAL_TYPES.find(mt => mt.id === meal.mealType);
-      if (mealType) {
-        mealEvents.push({
-          id: `meal_${key}`,
-          title: `${mealType.icon} ${meal.name}`,
-          start: `${meal.date}T${mealType.time}`,
-          allDay: false,
-          backgroundColor: MEAL_COLORS[meal.mealType] || '#FFB347',
-          borderColor: MEAL_COLORS[meal.mealType] || '#FFB347',
-          textColor: '#333',
-          extendedProps: {
-            type: 'meal',
-            mealType: meal.mealType,
-            mealName: meal.name
-          }
-        });
-      }
-    }
-  });
+  // Check if a date has any meals
+  const dateHasMeals = (dateStr) => {
+    return MEAL_TYPES.some(mealType => getMeal(dateStr, mealType.id));
+  };
 
-  // Transform events for FullCalendar
+  // Get meals for a specific date
+  const getMealsForDate = (dateStr) => {
+    return MEAL_TYPES.map(mealType => ({
+      ...mealType,
+      meal: getMeal(dateStr, mealType.id)
+    })).filter(item => item.meal);
+  };
+
+  // Transform events for FullCalendar (only regular events, not meals)
   const calendarEvents = events.map(event => {
     const memberIds = event.memberIds || (event.memberId ? [event.memberId] : []);
     const firstMember = FAMILY_MEMBERS.find(m => memberIds.includes(m.id));
@@ -78,45 +113,45 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
     };
   });
 
-  // Combine calendar events and meal events
-  const allEvents = [...calendarEvents, ...mealEvents];
-
   const handleDateClick = (info) => {
     onDateSelect(info.dateStr);
   };
 
   const handleEventClick = (info) => {
-    // Only handle non-meal events
-    if (info.event.extendedProps.type !== 'meal') {
-      const event = events.find(e => e.id === info.event.id);
-      if (event) {
-        onEventClick(event);
-      }
+    const event = events.find(e => e.id === info.event.id);
+    if (event) {
+      onEventClick(event);
     }
   };
 
   const handleSelect = (info) => {
     onDateSelect(info.startStr.split('T')[0]);
-    onAddEvent();
   };
 
-  // Handle mouse enter on day cell
-  const handleDayCellDidMount = (arg) => {
-    const dateStr = arg.date.toISOString().split('T')[0];
-    
-    arg.el.addEventListener('mouseenter', (e) => {
-      const rect = arg.el.getBoundingClientRect();
-      setHoverPosition({ 
-        x: rect.left + rect.width / 2, 
-        y: rect.bottom + 5 
-      });
-      setHoveredDate(dateStr);
+  // Handle food bowl icon click
+  const handleMealIconClick = (e, dateStr) => {
+    e.stopPropagation();
+    const rect = e.target.getBoundingClientRect();
+    setPopupPosition({ 
+      x: rect.left + rect.width / 2, 
+      y: rect.bottom + 5 
     });
-    
-    arg.el.addEventListener('mouseleave', () => {
-      setHoveredDate(null);
-    });
+    setMealPopupDate(mealPopupDate === dateStr ? null : dateStr);
+  };
 
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.meal-popup') && !e.target.closest('.meal-icon-btn')) {
+        setMealPopupDate(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  // Handle day cell mounting
+  const handleDayCellDidMount = (arg) => {
     // Add rainbow gradient based on day of week
     const dayOfWeek = arg.date.getDay();
     const rainbowColors = [
@@ -131,19 +166,22 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
     arg.el.style.backgroundColor = rainbowColors[dayOfWeek];
   };
 
-  // Get meals for hovered date
-  const getHoveredDateMeals = () => {
-    if (!hoveredDate) return [];
-    return MEAL_TYPES.map(mealType => ({
-      ...mealType,
-      meal: getMeal(hoveredDate, mealType.id)
-    }));
-  };
-
-  // Custom day cell content
+  // Custom day cell content with food bowl icon
   const dayCellContent = (arg) => {
+    const dateStr = formatDateLocal(arg.date);
+    const hasMeals = dateHasMeals(dateStr);
+    
     return (
       <div className="day-cell-content">
+        {hasMeals && (
+          <button 
+            className="meal-icon-btn"
+            onClick={(e) => handleMealIconClick(e, dateStr)}
+            title="View meals"
+          >
+            🍲
+          </button>
+        )}
         <span className="day-number">{arg.dayNumberText}</span>
       </div>
     );
@@ -170,7 +208,7 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           }}
-          events={allEvents}
+          events={calendarEvents}
           dateClick={handleDateClick}
           eventClick={handleEventClick}
           selectable={true}
@@ -189,38 +227,133 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
           }}
         />
 
-        {/* Hover Popup for Day */}
-        {hoveredDate && (
+        {/* Meal Popup - appears when food bowl icon is clicked */}
+        {mealPopupDate && (
           <div 
-            className="day-hover-popup"
+            className="meal-popup"
             style={{
-              left: `${hoverPosition.x}px`,
-              top: `${hoverPosition.y}px`,
+              left: `${popupPosition.x}px`,
+              top: `${popupPosition.y}px`,
             }}
           >
             <div className="popup-header">
               <span className="popup-date">
-                {new Date(hoveredDate + 'T12:00:00').toLocaleDateString('en-US', {
+                🍽️ {new Date(mealPopupDate + 'T12:00:00').toLocaleDateString('en-US', {
                   weekday: 'short',
                   month: 'short',
                   day: 'numeric'
                 })}
               </span>
+              <button className="popup-close" onClick={() => setMealPopupDate(null)}>×</button>
             </div>
             <div className="popup-meals">
-              {getHoveredDateMeals().map(item => (
-                <div 
-                  key={item.id} 
-                  className="popup-meal-row"
-                  style={{ borderLeftColor: MEAL_COLORS[item.id] }}
-                >
-                  <span className="popup-meal-icon">{item.icon}</span>
-                  <span className="popup-meal-time">{item.time}</span>
-                  <span className="popup-meal-name">
-                    {item.meal?.name || '—'}
-                  </span>
-                </div>
-              ))}
+              {getMealsForDate(mealPopupDate).map(item => {
+                const likedBy = item.meal?.likedBy || [];
+                const dislikedBy = item.meal?.dislikedBy || [];
+                const allVoted = likedBy.length + dislikedBy.length >= FAMILY_MEMBERS.length;
+                const isVotingThis = votingMeal?.mealType === item.id;
+                
+                return (
+                  <div 
+                    key={item.id} 
+                    className="popup-meal-row"
+                    style={{ borderLeftColor: MEAL_COLORS[item.id] }}
+                  >
+                    <div className="popup-meal-info">
+                      <span className="popup-meal-icon">{item.icon}</span>
+                      <span className="popup-meal-name">{item.meal?.name}</span>
+                    </div>
+                    
+                    <div className="popup-votes">
+                      {/* Like section */}
+                      <div className="vote-section">
+                        <button 
+                          className={`vote-btn like ${allVoted ? 'disabled' : ''} ${isVotingThis && votingMeal.voteType === 'like' ? 'active' : ''}`}
+                          onClick={() => !allVoted && setVotingMeal(
+                            isVotingThis && votingMeal.voteType === 'like' 
+                              ? null 
+                              : { mealType: item.id, voteType: 'like' }
+                          )}
+                          disabled={allVoted}
+                          title={allVoted ? 'All voted' : 'Click to vote'}
+                        >
+                          👍
+                        </button>
+                        <div className="vote-avatars">
+                          {likedBy.map(memberId => {
+                            const member = FAMILY_MEMBERS.find(m => m.id === memberId);
+                            return member ? (
+                              <span 
+                                key={memberId}
+                                className="mini-avatar"
+                                style={{ backgroundColor: member.color }}
+                                title={member.name}
+                              >
+                                {member.name.charAt(0)}
+                              </span>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                      
+                      {/* Dislike section */}
+                      <div className="vote-section">
+                        <button 
+                          className={`vote-btn dislike ${allVoted ? 'disabled' : ''} ${isVotingThis && votingMeal.voteType === 'dislike' ? 'active' : ''}`}
+                          onClick={() => !allVoted && setVotingMeal(
+                            isVotingThis && votingMeal.voteType === 'dislike' 
+                              ? null 
+                              : { mealType: item.id, voteType: 'dislike' }
+                          )}
+                          disabled={allVoted}
+                          title={allVoted ? 'All voted' : 'Click to vote'}
+                        >
+                          👎
+                        </button>
+                        <div className="vote-avatars">
+                          {dislikedBy.map(memberId => {
+                            const member = FAMILY_MEMBERS.find(m => m.id === memberId);
+                            return member ? (
+                              <span 
+                                key={memberId}
+                                className="mini-avatar"
+                                style={{ backgroundColor: member.color }}
+                                title={member.name}
+                              >
+                                {member.name.charAt(0)}
+                              </span>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Member selection dropdown */}
+                    {isVotingThis && (
+                      <div className="member-vote-picker">
+                        <span className="picker-label">Who's voting?</span>
+                        <div className="picker-members">
+                          {getUnvotedMembers(item.meal).map(member => (
+                            <button
+                              key={member.id}
+                              className="picker-member"
+                              style={{ backgroundColor: member.color }}
+                              onClick={() => handleMemberVote(member.id)}
+                              title={member.name}
+                            >
+                              {member.name.charAt(0)}
+                            </button>
+                          ))}
+                          {getUnvotedMembers(item.meal).length === 0 && (
+                            <span className="no-members">All voted!</span>
+                          )}
+                        </div>
+                        <button className="picker-cancel" onClick={() => setVotingMeal(null)}>Cancel</button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
