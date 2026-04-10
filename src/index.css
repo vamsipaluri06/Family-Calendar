@@ -489,8 +489,24 @@ body {
 
 .fc .fc-event {
   border: none;
-  padding: 2px 6px;
+  border-left: 3px solid;
+  border-left-color: inherit;
+  padding: 3px 8px;
   font-size: 12px;
+  font-weight: 500;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: 2px;
+}
+
+.fc .fc-event:hover {
+  transform: translateX(2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fc .fc-event-title {
+  font-weight: 500;
 }
 
 .day-cell-content {
