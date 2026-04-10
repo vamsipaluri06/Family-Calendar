@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { useFamily } from '../context/FamilyContext';
-import ExpenseModal from './ExpenseModal';
 
 // Base URL for Vite public assets
 const BASE_URL = import.meta.env.BASE_URL || '/';
@@ -65,19 +64,13 @@ function GroceryList() {
     toggleGroceryItem, 
     removeGroceryItem,
     clearCheckedGroceryItems,
-    updateGroceryItem,
-    getMonthlyTotal,
-    getAnnualTotal
+    updateGroceryItem
   } = useFamily();
   
   const [selectedStore, setSelectedStore] = useState(null);
   const [newItem, setNewItem] = useState('');
   const [showChecked, setShowChecked] = useState(true);
   const [showUncategorized, setShowUncategorized] = useState(false);
-  const [expenseStore, setExpenseStore] = useState(null);
-
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
 
   // Group items by store
   const itemsByStore = useMemo(() => {
@@ -134,61 +127,46 @@ function GroceryList() {
           {GROCERY_STORES.map(store => {
             const pendingCount = getStoreCount(store.id);
             const totalCount = getTotalPendingCount(store.id);
-            const monthlySpent = getMonthlyTotal(store.id, currentYear, currentMonth);
+            
             
             return (
-              <div key={store.id} className="store-card-wrapper">
-                <button
-                  className="store-card"
-                  onClick={() => setSelectedStore(store)}
-                  style={{ '--store-color': store.color }}
-                >
-                  <div className="store-logo-container">
-                    {store.logo ? (
-                      <img 
-                        src={store.logo} 
-                        alt={store.name}
-                        className="store-logo"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.parentElement.querySelector('.store-fallback').style.display = 'flex';
-                        }}
-                      />
-                    ) : (
-                      <span className="store-emoji">{store.emoji}</span>
-                    )}
-                    <span 
-                      className="store-fallback" 
-                      style={{ 
-                        display: 'none',
-                        backgroundColor: store.color 
+              <button
+                key={store.id}
+                className="store-card"
+                onClick={() => setSelectedStore(store)}
+                style={{ '--store-color': store.color }}
+              >
+                <div className="store-logo-container">
+                  {store.logo ? (
+                    <img 
+                      src={store.logo} 
+                      alt={store.name}
+                      className="store-logo"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.querySelector('.store-fallback').style.display = 'flex';
                       }}
-                    >
-                      {store.name.charAt(0)}
-                    </span>
+                    />
+                  ) : (
+                    <span className="store-emoji">{store.emoji}</span>
+                  )}
+                  <span 
+                    className="store-fallback" 
+                    style={{ 
+                      display: 'none',
+                      backgroundColor: store.color 
+                    }}
+                  >
+                    {store.name.charAt(0)}
+                  </span>
+                </div>
+                <span className="store-name">{store.name}</span>
+                {totalCount > 0 && (
+                  <div className="store-badge">
+                    {pendingCount > 0 ? pendingCount : '✓'}
                   </div>
-                  <span className="store-name">{store.name}</span>
-                  {monthlySpent > 0 && (
-                    <span className="store-spending">${monthlySpent.toFixed(0)}</span>
-                  )}
-                  {totalCount > 0 && (
-                    <div className="store-badge">
-                      {pendingCount > 0 ? pendingCount : '✓'}
-                    </div>
-                  )}
-                </button>
-                <button 
-                  className="expense-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setExpenseStore(store);
-                  }}
-                  title="Track expenses"
-                  style={{ backgroundColor: store.color }}
-                >
-                  💰
-                </button>
-              </div>
+                )}
+              </button>
             );
           })}
         </div>
@@ -235,14 +213,6 @@ function GroceryList() {
             )}
           </div>
         )}
-
-        {/* Expense Modal */}
-        {expenseStore && (
-          <ExpenseModal 
-            store={expenseStore} 
-            onClose={() => setExpenseStore(null)} 
-          />
-        )}
       </div>
     );
   }
@@ -266,17 +236,8 @@ function GroceryList() {
           )}
           <h2>{selectedStore.name}</h2>
         </div>
-        <div className="store-header-actions">
-          <div className="grocery-stats">
-            <span className="stat pending">{pendingItems.length} to buy</span>
-          </div>
-          <button 
-            className="btn btn-expense"
-            onClick={() => setExpenseStore(selectedStore)}
-            style={{ backgroundColor: selectedStore.color }}
-          >
-            💰 Expenses
-          </button>
+        <div className="grocery-stats">
+          <span className="stat pending">{pendingItems.length} to buy</span>
         </div>
       </div>
 
@@ -375,14 +336,6 @@ function GroceryList() {
             </ul>
           )}
         </div>
-      )}
-
-      {/* Expense Modal */}
-      {expenseStore && (
-        <ExpenseModal 
-          store={expenseStore} 
-          onClose={() => setExpenseStore(null)} 
-        />
       )}
     </div>
   );

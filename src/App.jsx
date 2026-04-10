@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Calendar from './components/Calendar';
 import MealPlanner from './components/MealPlanner';
 import GroceryList from './components/GroceryList';
+import ExpenseSummary from './components/ExpenseSummary';
 import EventModal from './components/EventModal';
 import MealModal from './components/MealModal';
 import LoginPage from './components/LoginPage';
@@ -285,6 +286,9 @@ function App() {
           {activeView === 'grocery' && (
             <GroceryList />
           )}
+          {activeView === 'expenses' && (
+            <ExpenseSummary />
+          )}
         </main>
       </div>
 
@@ -334,6 +338,13 @@ function App() {
         >
           <span className="mobile-nav-icon">🛒</span>
           <span className="mobile-nav-label">Grocery</span>
+        </button>
+        <button 
+          className={`mobile-nav-btn ${activeView === 'expenses' ? 'active' : ''}`}
+          onClick={() => setActiveView('expenses')}
+        >
+          <span className="mobile-nav-icon">💰</span>
+          <span className="mobile-nav-label">Expenses</span>
         </button>
       </nav>
     </div>

@@ -1082,6 +1082,142 @@
   color: var(--primary);
 }
 
+/* Expense Summary Page */
+.expense-summary {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.expense-summary-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.expense-summary-header h2 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.expense-summary .expense-month-selector {
+  background: transparent;
+  padding: 0;
+  justify-content: flex-start;
+}
+
+.expense-totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.total-card {
+  padding: 20px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.total-card.monthly {
+  background: linear-gradient(135deg, #4285f4, #2563eb);
+  color: white;
+}
+
+.total-card.annual {
+  background: linear-gradient(135deg, #34a853, #16a34a);
+  color: white;
+}
+
+.total-card .total-label {
+  font-size: 13px;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.total-card .total-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.store-expense-list {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.store-expense-list h3 {
+  padding: 16px 20px;
+  margin: 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+}
+
+.store-expense-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.store-expense-row:last-child {
+  border-bottom: none;
+}
+
+.store-expense-row:hover {
+  background: var(--bg-hover);
+}
+
+.store-expense-row .store-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.store-logo-tiny {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.store-emoji-tiny {
+  font-size: 24px;
+  width: 32px;
+  text-align: center;
+}
+
+.store-expense-row .store-name {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.store-amounts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.store-amounts .monthly-amount {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.store-amounts .annual-amount {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 /* Mobile Store Grid */
 @media (max-width: 768px) {
   .store-grid {
@@ -1264,6 +1400,37 @@
 
   .all-stores-summary {
     padding: 14px 16px;
+  }
+
+  /* Expense Summary Mobile */
+  .expense-summary {
+    padding: 16px;
+  }
+
+  .expense-summary-header h2 {
+    font-size: 20px;
+  }
+
+  .expense-totals {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .total-card {
+    padding: 16px;
+  }
+
+  .total-card .total-value {
+    font-size: 24px;
+  }
+
+  .store-expense-row {
+    padding: 14px 16px;
+  }
+
+  .store-logo-tiny {
+    width: 28px;
+    height: 28px;
   }
 }
 
