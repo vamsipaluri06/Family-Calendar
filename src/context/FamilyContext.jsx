@@ -302,6 +302,15 @@ export function FamilyProvider({ children }) {
     }
   };
 
+  const updateGroceryItem = async (id, updates) => {
+    if (db) {
+      const itemRef = ref(db, `groceryItems/${id}`);
+      await update(itemRef, updates);
+    } else {
+      setGroceryItems(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
+    }
+  };
+
   const generateGroceryFromMeals = async (startDate, endDate) => {
     // Get all meals in date range and extract ingredients
     const ingredients = [];
@@ -414,6 +423,7 @@ export function FamilyProvider({ children }) {
       addGroceryItem,
       toggleGroceryItem,
       removeGroceryItem,
+      updateGroceryItem,
       generateGroceryFromMeals,
       clearCheckedGroceryItems,
 

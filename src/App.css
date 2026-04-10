@@ -347,12 +347,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
 .grocery-header h2 {
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
 }
 
 .grocery-stats {
@@ -570,6 +571,381 @@
 
 .quick-add-btn:hover {
   background: #e8eaed;
+}
+
+/* Store Grid Styles */
+.grocery-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.store-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.store-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 120px;
+}
+
+.store-card:hover {
+  border-color: var(--store-color, var(--primary));
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.store-logo-container {
+  width: 80px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.store-logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.store-emoji {
+  font-size: 48px;
+}
+
+.store-fallback {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.store-name {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.store-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 24px;
+  height: 24px;
+  background: var(--primary);
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+}
+
+.uncategorized-section {
+  margin-top: 24px;
+}
+
+.uncategorized-notice {
+  padding: 16px;
+  background: #fff3e0;
+  border-radius: 8px;
+  text-align: center;
+  color: #e65100;
+}
+
+.uncategorized-notice.clickable {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.2s ease;
+}
+
+.uncategorized-notice.clickable:hover {
+  background: #ffe0b2;
+}
+
+.uncategorized-notice .toggle-icon {
+  font-size: 12px;
+  color: #e65100;
+}
+
+.uncategorized-items {
+  margin-top: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.uncategorized-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 12px;
+}
+
+.uncategorized-item:last-child {
+  border-bottom: none;
+}
+
+.uncategorized-item .item-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.assign-store-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.assign-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.assign-btn:hover {
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
+/* Store Items View */
+.store-header {
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.store-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.store-logo-small {
+  height: 32px;
+  width: auto;
+}
+
+.store-emoji-small {
+  font-size: 32px;
+}
+
+.grocery-section {
+  margin-top: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.section-title.clickable {
+  cursor: pointer;
+}
+
+.section-title.clickable:hover {
+  color: var(--primary);
+}
+
+.toggle-icon {
+  font-size: 12px;
+  margin-left: 8px;
+  color: var(--text-muted);
+}
+
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-header-row .section-title {
+  margin-bottom: 0;
+}
+
+.checked-section {
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.checked-items .grocery-item {
+  opacity: 0.7;
+}
+
+.empty-message {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 24px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+/* Mobile Store Grid */
+@media (max-width: 768px) {
+  .store-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  
+  .store-card {
+    padding: 14px 10px;
+    min-height: 110px;
+  }
+  
+  .store-logo-container {
+    width: 65px;
+    height: 50px;
+  }
+  
+  .store-name {
+    font-size: 11px;
+    text-align: center;
+  }
+  
+  .grocery-header.store-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .store-title h2 {
+    font-size: 18px;
+  }
+  
+  .add-item-form {
+    flex-direction: column;
+  }
+  
+  .add-item-form .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .store-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .store-card {
+    padding: 16px 12px;
+    min-height: 120px;
+    border-radius: 12px;
+  }
+  
+  .store-card:active {
+    transform: scale(0.98);
+    background: var(--bg-hover);
+  }
+  
+  .store-logo-container {
+    width: 70px;
+    height: 55px;
+  }
+  
+  .store-emoji {
+    font-size: 40px;
+  }
+  
+  .store-name {
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  
+  .store-badge {
+    top: -6px;
+    right: -6px;
+    min-width: 22px;
+    height: 22px;
+    font-size: 11px;
+  }
+  
+  .grocery-list {
+    padding: 16px;
+  }
+  
+  .grocery-header h2 {
+    font-size: 20px;
+  }
+  
+  .grocery-subtitle {
+    font-size: 13px;
+  }
+  
+  .grocery-item {
+    padding: 14px 12px;
+  }
+  
+  .grocery-item .checkbox-label {
+    gap: 14px;
+  }
+  
+  .grocery-item .checkbox-label input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .item-name {
+    font-size: 15px;
+  }
+  
+  .remove-btn {
+    opacity: 1;
+    font-size: 22px;
+    padding: 8px;
+  }
+  
+  .add-item-input {
+    font-size: 16px;
+    padding: 14px 16px;
+  }
+  
+  .section-title {
+    font-size: 15px;
+  }
+  
+  .back-btn {
+    padding: 10px 16px;
+    font-size: 15px;
+  }
 }
 
 /* Modal Styles */
