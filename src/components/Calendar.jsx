@@ -22,6 +22,16 @@ const MEAL_COLORS = {
   dinner: '#C7CEEA',    // Soft lavender
 };
 
+// Alternating event colors for better visual distinction
+const ALTERNATING_COLORS = [
+  { bg: '#667eea', border: '#5a6fd6' },  // Purple
+  { bg: '#f093fb', border: '#e080eb' },  // Pink
+  { bg: '#4facfe', border: '#3d9bee' },  // Blue
+  { bg: '#43e97b', border: '#38d46d' },  // Green
+  { bg: '#fa709a', border: '#e8608a' },  // Rose
+  { bg: '#fee140', border: '#ecd130' },  // Yellow
+];
+
 function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
   const calendarRef = useRef(null);
   const { events, FAMILY_MEMBERS, MEAL_TYPES, getMeal, setMeal } = useFamily();
@@ -89,31 +99,61 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
     })).filter(item => item.meal);
   };
 
-  // Transform events for FullCalendar (only regular events, not meals)
-  const calendarEvents = events.map(event => {
-    const memberIds = event.memberIds || (event.memberId ? [event.memberId] : []);
-    const firstMember = FAMILY_MEMBERS.find(m => memberIds.includes(m.id));
-    const memberNames = memberIds
-      .map(id => FAMILY_MEMBERS.find(m => m.id === id)?.name)
-      .filter(Boolean)
-      .join(', ');
-    
-    return {
-      id: event.id,
-      title: event.title,
-      start: event.start,
-      end: event.end,
-      allDay: event.allDay,
-      backgroundColor: firstMember?.color || '#4285f4',
-      borderColor: firstMember?.color || '#4285f4',
-      extendedProps: {
-        description: event.description,
-        memberIds: memberIds,
-        memberNames: memberNames,
-        type: 'event'
+  // Transform events for FullCalendar with alternating colors for same-day events
+  const calendarEvents = (() => {
+    // Group events by date
+    const eventsByDate = {};
+    events.forEach(event => {
+      const dateKey = event.start.split('T')[0]; // Get just the date part
+      if (!eventsByDate[dateKey]) {
+        eventsByDate[dateKey] = [];
       }
-    };
-  });
+      eventsByDate[dateKey].push(event);
+    });
+
+    // Transform events with alternating colors
+    return events.map(event => {
+      const memberIds = event.memberIds || (event.memberId ? [event.memberId] : []);
+      const firstMember = FAMILY_MEMBERS.find(m => memberIds.includes(m.id));
+      const memberNames = memberIds
+        .map(id => FAMILY_MEMBERS.find(m => m.id === id)?.name)
+        .filter(Boolean)
+        .join(', ');
+      
+      // Get the index of this event within its day
+      const dateKey = event.start.split('T')[0];
+      const dayEvents = eventsByDate[dateKey] || [];
+      const eventIndex = dayEvents.findIndex(e => e.id === event.id);
+      
+      // Use alternating colors if there are multiple events on the same day
+      let backgroundColor, borderColor;
+      if (dayEvents.length > 1) {
+        const colorSet = ALTERNATING_COLORS[eventIndex % ALTERNATING_COLORS.length];
+        backgroundColor = colorSet.bg;
+        borderColor = colorSet.border;
+      } else {
+        // Single event - use member color or default
+        backgroundColor = firstMember?.color || '#4285f4';
+        borderColor = firstMember?.color || '#4285f4';
+      }
+      
+      return {
+        id: event.id,
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        allDay: event.allDay,
+        backgroundColor,
+        borderColor,
+        extendedProps: {
+          description: event.description,
+          memberIds: memberIds,
+          memberNames: memberNames,
+          type: 'event'
+        }
+      };
+    });
+  })();
 
   const handleDateClick = (info) => {
     onDateSelect(info.dateStr);

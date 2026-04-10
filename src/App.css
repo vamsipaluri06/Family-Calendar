@@ -1788,11 +1788,27 @@
   z-index: 10;
 }
 
-/* Meal Events Styling */
+/* Event Styling with Alternating Colors */
 .fc .fc-event {
   border-radius: 4px;
+  border-left: 3px solid;
   font-size: 11px;
-  padding: 2px 4px;
+  font-weight: 500;
+  padding: 3px 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+  transition: all 0.15s ease;
+  margin-bottom: 2px;
+  cursor: pointer;
+}
+
+.fc .fc-event:hover {
+  transform: translateX(2px) scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 5;
+}
+
+.fc .fc-event-title {
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 /* Rainbow Header Colors */
