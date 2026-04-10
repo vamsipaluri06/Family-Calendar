@@ -447,11 +447,61 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
           <h4>🍽️ Meals</h4>
           {MEAL_TYPES.map(mealType => {
             const meal = getMeal(selectedDate, mealType.id);
+            const likedBy = meal?.likedBy || [];
+            const dislikedBy = meal?.dislikedBy || [];
+            
             return (
-              <div key={mealType.id} className="meal-slot">
-                <span className="meal-icon">{mealType.icon}</span>
-                <span className="meal-type">{mealType.name}</span>
-                <span className="meal-name">{meal?.name || '—'}</span>
+              <div key={mealType.id} className="meal-slot-full">
+                <div className="meal-slot-header">
+                  <span className="meal-icon">{mealType.icon}</span>
+                  <span className="meal-type">{mealType.name}</span>
+                  <span className="meal-name">{meal?.name || '—'}</span>
+                </div>
+                
+                {meal && (likedBy.length > 0 || dislikedBy.length > 0) && (
+                  <div className="meal-slot-votes">
+                    {likedBy.length > 0 && (
+                      <div className="meal-vote-group">
+                        <span className="vote-emoji">👍</span>
+                        <div className="vote-avatars-summary">
+                          {likedBy.map(memberId => {
+                            const member = FAMILY_MEMBERS.find(m => m.id === memberId);
+                            return member ? (
+                              <span 
+                                key={memberId}
+                                className="mini-avatar"
+                                style={{ backgroundColor: member.color }}
+                                title={member.name}
+                              >
+                                {member.name.charAt(0)}
+                              </span>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    {dislikedBy.length > 0 && (
+                      <div className="meal-vote-group">
+                        <span className="vote-emoji">👎</span>
+                        <div className="vote-avatars-summary">
+                          {dislikedBy.map(memberId => {
+                            const member = FAMILY_MEMBERS.find(m => m.id === memberId);
+                            return member ? (
+                              <span 
+                                key={memberId}
+                                className="mini-avatar"
+                                style={{ backgroundColor: member.color }}
+                                title={member.name}
+                              >
+                                {member.name.charAt(0)}
+                              </span>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
