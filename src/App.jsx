@@ -5,7 +5,9 @@ import GroceryList from './components/GroceryList';
 import EventModal from './components/EventModal';
 import MealModal from './components/MealModal';
 import SettingsModal from './components/SettingsModal';
+import LoginPage from './components/LoginPage';
 import { useFamily } from './context/FamilyContext';
+import { useAuth } from './context/AuthContext';
 import './App.css';
 
 // Helper to format date as YYYY-MM-DD in local time
@@ -29,6 +31,9 @@ function App() {
 
   // Live clock state
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Auth state
+  const { isLoggedIn, currentUser, logout, loading: authLoading } = useAuth();
 
   // Update clock every second
   useEffect(() => {
@@ -74,6 +79,21 @@ function App() {
     setEditingMeal({ ...meal, mealType, isNew: false });
     setShowMealModal(true);
   };
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Show login page if not logged in
+  if (!isLoggedIn) {
+    return <LoginPage />;
+  }
 
   if (loading) {
     return (
@@ -129,18 +149,23 @@ function App() {
           <div className={`sync-status ${isFirebaseConnected ? 'connected' : 'local'}`}>
             {isFirebaseConnected ? '🔄 Synced' : '💾 Local'}
           </div>
-          <div className="family-avatars">
-            {FAMILY_MEMBERS.map(member => (
-              <div 
-                key={member.id}
-                className="avatar"
-                style={{ backgroundColor: member.color }}
-                title={member.name}
-              >
-                {member.name.charAt(0)}
-              </div>
-            ))}
+          <div className="current-user-info">
+            <div 
+              className="avatar current-user-avatar"
+              style={{ backgroundColor: currentUser?.color }}
+              title={`Logged in as ${currentUser?.name}`}
+            >
+              {currentUser?.name?.charAt(0)}
+            </div>
+            <span className="current-user-name">{currentUser?.name}</span>
           </div>
+          <button 
+            className="logout-btn"
+            onClick={logout}
+            title="Logout"
+          >
+            🚪
+          </button>
           <button 
             className="settings-btn"
             onClick={() => setShowSettingsModal(true)}
@@ -152,9 +177,20 @@ function App() {
       </header>
 
       <div className="main-container">
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && window.innerWidth <= 768 && (
+          <div 
+            className="sidebar-overlay visible" 
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+        
         {/* Sidebar */}
         <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-          <button className="add-event-btn" onClick={handleAddEvent}>
+          <button className="add-event-btn" onClick={() => {
+            handleAddEvent();
+            if (window.innerWidth <= 768) setSidebarOpen(false);
+          }}>
             <span className="plus-icon">+</span>
             <span>Create</span>
           </button>
@@ -162,21 +198,30 @@ function App() {
           <nav className="nav-menu">
             <button 
               className={`nav-item ${activeView === 'calendar' ? 'active' : ''}`}
-              onClick={() => setActiveView('calendar')}
+              onClick={() => {
+                setActiveView('calendar');
+                if (window.innerWidth <= 768) setSidebarOpen(false);
+              }}
             >
               <span className="nav-icon">📅</span>
               <span>Calendar</span>
             </button>
             <button 
               className={`nav-item ${activeView === 'meals' ? 'active' : ''}`}
-              onClick={() => setActiveView('meals')}
+              onClick={() => {
+                setActiveView('meals');
+                if (window.innerWidth <= 768) setSidebarOpen(false);
+              }}
             >
               <span className="nav-icon">🍽️</span>
               <span>Meal Planner</span>
             </button>
             <button 
               className={`nav-item ${activeView === 'grocery' ? 'active' : ''}`}
-              onClick={() => setActiveView('grocery')}
+              onClick={() => {
+                setActiveView('grocery');
+                if (window.innerWidth <= 768) setSidebarOpen(false);
+              }}
             >
               <span className="nav-icon">🛒</span>
               <span>Grocery List</span>
@@ -275,6 +320,45 @@ function App() {
           onClose={() => setShowSettingsModal(false)}
         />
       )}
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        <button 
+          className={`mobile-nav-btn ${activeView === 'calendar' ? 'active' : ''}`}
+          onClick={() => setActiveView('calendar')}
+        >
+          <span className="mobile-nav-icon">📅</span>
+          <span className="mobile-nav-label">Calendar</span>
+        </button>
+        <button 
+          className={`mobile-nav-btn ${activeView === 'meals' ? 'active' : ''}`}
+          onClick={() => setActiveView('meals')}
+        >
+          <span className="mobile-nav-icon">🍽️</span>
+          <span className="mobile-nav-label">Meals</span>
+        </button>
+        <button 
+          className="mobile-nav-btn add-btn"
+          onClick={handleAddEvent}
+        >
+          <span className="mobile-nav-icon">➕</span>
+          <span className="mobile-nav-label">Add</span>
+        </button>
+        <button 
+          className={`mobile-nav-btn ${activeView === 'grocery' ? 'active' : ''}`}
+          onClick={() => setActiveView('grocery')}
+        >
+          <span className="mobile-nav-icon">🛒</span>
+          <span className="mobile-nav-label">Grocery</span>
+        </button>
+        <button 
+          className="mobile-nav-btn"
+          onClick={() => setShowSettingsModal(true)}
+        >
+          <span className="mobile-nav-icon">⚙️</span>
+          <span className="mobile-nav-label">Settings</span>
+        </button>
+      </nav>
     </div>
   );
 }

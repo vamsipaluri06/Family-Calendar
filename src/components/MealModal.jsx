@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useFamily } from '../context/FamilyContext';
+import { useAuth } from '../context/AuthContext';
 
 function MealModal({ meal, selectedDate, onClose }) {
   const { setMeal, deleteMeal, MEAL_TYPES, FAMILY_MEMBERS } = useFamily();
+  const { currentUser } = useAuth();
   
   const mealType = MEAL_TYPES.find(mt => mt.id === meal?.mealType);
   
@@ -20,7 +22,6 @@ function MealModal({ meal, selectedDate, onClose }) {
   });
 
   const [ingredientInput, setIngredientInput] = useState('');
-  const [votingMode, setVotingMode] = useState(null); // 'like' or 'dislike'
 
   useEffect(() => {
     if (meal && !meal.isNew) {
@@ -39,16 +40,17 @@ function MealModal({ meal, selectedDate, onClose }) {
     }
   }, [meal]);
 
-  // Handle member vote
-  const handleMemberVote = (memberId) => {
-    if (!votingMode) return;
+  // Handle vote for logged-in user
+  const handleVote = (voteType) => {
+    if (!currentUser) return;
+    const memberId = currentUser.id;
     
-    // Check if member already voted
+    // Check if user already voted
     if (formData.likedBy.includes(memberId) || formData.dislikedBy.includes(memberId)) {
       return;
     }
 
-    if (votingMode === 'like') {
+    if (voteType === 'like') {
       setFormData(prev => ({ 
         ...prev, 
         likedBy: [...prev.likedBy, memberId]
@@ -59,14 +61,12 @@ function MealModal({ meal, selectedDate, onClose }) {
         dislikedBy: [...prev.dislikedBy, memberId]
       }));
     }
-    setVotingMode(null);
   };
 
-  // Get members who haven't voted yet
-  const getUnvotedMembers = () => {
-    return FAMILY_MEMBERS.filter(m => 
-      !formData.likedBy.includes(m.id) && !formData.dislikedBy.includes(m.id)
-    );
+  // Check if current user has voted
+  const hasCurrentUserVoted = () => {
+    if (!currentUser) return false;
+    return formData.likedBy.includes(currentUser.id) || formData.dislikedBy.includes(currentUser.id);
   };
 
   const handleSubmit = async (e) => {
@@ -158,9 +158,10 @@ function MealModal({ meal, selectedDate, onClose }) {
                 <div className="rating-vote-group">
                   <button
                     type="button"
-                    className={`vote-btn like ${formData.likedBy.length + formData.dislikedBy.length >= FAMILY_MEMBERS.length ? 'disabled' : ''} ${votingMode === 'like' ? 'active' : ''}`}
-                    onClick={() => setVotingMode(votingMode === 'like' ? null : 'like')}
-                    disabled={formData.likedBy.length + formData.dislikedBy.length >= FAMILY_MEMBERS.length}
+                    className={`vote-btn like ${hasCurrentUserVoted() ? 'disabled' : ''} ${formData.likedBy.includes(currentUser?.id) ? 'active voted' : ''}`}
+                    onClick={() => !hasCurrentUserVoted() && handleVote('like')}
+                    disabled={hasCurrentUserVoted()}
+                    title={hasCurrentUserVoted() ? (formData.likedBy.includes(currentUser?.id) ? 'You liked this' : 'You already voted') : 'Like this meal'}
                   >
                     👍
                   </button>
@@ -185,9 +186,10 @@ function MealModal({ meal, selectedDate, onClose }) {
                 <div className="rating-vote-group">
                   <button
                     type="button"
-                    className={`vote-btn dislike ${formData.likedBy.length + formData.dislikedBy.length >= FAMILY_MEMBERS.length ? 'disabled' : ''} ${votingMode === 'dislike' ? 'active' : ''}`}
-                    onClick={() => setVotingMode(votingMode === 'dislike' ? null : 'dislike')}
-                    disabled={formData.likedBy.length + formData.dislikedBy.length >= FAMILY_MEMBERS.length}
+                    className={`vote-btn dislike ${hasCurrentUserVoted() ? 'disabled' : ''} ${formData.dislikedBy.includes(currentUser?.id) ? 'active voted' : ''}`}
+                    onClick={() => !hasCurrentUserVoted() && handleVote('dislike')}
+                    disabled={hasCurrentUserVoted()}
+                    title={hasCurrentUserVoted() ? (formData.dislikedBy.includes(currentUser?.id) ? 'You disliked this' : 'You already voted') : 'Dislike this meal'}
                   >
                     👎
                   </button>
@@ -208,31 +210,6 @@ function MealModal({ meal, selectedDate, onClose }) {
                   </div>
                 </div>
               </div>
-              
-              {/* Member picker */}
-              {votingMode && (
-                <div className="member-vote-picker modal-picker">
-                  <span className="picker-label">Who's voting?</span>
-                  <div className="picker-members">
-                    {getUnvotedMembers().map(member => (
-                      <button
-                        key={member.id}
-                        type="button"
-                        className="picker-member"
-                        style={{ backgroundColor: member.color }}
-                        onClick={() => handleMemberVote(member.id)}
-                        title={member.name}
-                      >
-                        {member.name.charAt(0)}
-                      </button>
-                    ))}
-                    {getUnvotedMembers().length === 0 && (
-                      <span className="no-members">All voted!</span>
-                    )}
-                  </div>
-                  <button type="button" className="picker-cancel" onClick={() => setVotingMode(null)}>Cancel</button>
-                </div>
-              )}
             </div>
           </div>
         )}
