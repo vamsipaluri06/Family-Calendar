@@ -3,40 +3,53 @@ import { useAuth } from '../context/AuthContext';
 import { useFamily } from '../context/FamilyContext';
 
 function LoginPage() {
-  const { login } = useAuth();
+  const { login, adminLogin, verifyUserPassword, users } = useAuth();
   const { FAMILY_MEMBERS } = useFamily();
   const [selectedMember, setSelectedMember] = useState(null);
-  const [pin, setPin] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
 
-  // Simple PINs for each member (in real app, these would be stored securely)
-  const memberPins = {
-    'member1': '6565',
-    'member2': '6565',
-    'member3': '6565'
-  };
+  // Get members that have passwords set
+  const membersWithAccess = FAMILY_MEMBERS.filter(member => users[member.id]);
 
   const handleMemberSelect = (member) => {
     setSelectedMember(member);
-    setPin('');
+    setPassword('');
     setError('');
   };
 
-  const handlePinSubmit = (e) => {
+  const handlePasswordSubmit = (e) => {
     e.preventDefault();
     
-    if (pin === memberPins[selectedMember.id]) {
+    if (verifyUserPassword(selectedMember.id, password)) {
       login(selectedMember);
     } else {
-      setError('Incorrect PIN. Try again.');
-      setPin('');
+      setError('Incorrect password. Please try again.');
+      setPassword('');
+    }
+  };
+
+  const handleAdminSubmit = (e) => {
+    e.preventDefault();
+    
+    if (adminLogin(adminUsername, adminPassword)) {
+      // Success - redirect happens automatically
+    } else {
+      setError('Invalid admin credentials.');
+      setAdminPassword('');
     }
   };
 
   const handleBack = () => {
     setSelectedMember(null);
-    setPin('');
+    setPassword('');
     setError('');
+    setShowAdminLogin(false);
+    setAdminUsername('');
+    setAdminPassword('');
   };
 
   return (
@@ -45,32 +58,101 @@ function LoginPage() {
         <div className="login-header">
           <span className="login-icon">📅</span>
           <h1>Family Calendar</h1>
-          <p className="login-subtitle">Select your profile to continue</p>
+          <p className="login-subtitle">
+            {showAdminLogin ? 'Admin Login' : 'Select your profile to continue'}
+          </p>
         </div>
 
-        {!selectedMember ? (
+        {showAdminLogin ? (
+          // Admin login screen
+          <div className="admin-login">
+            <button className="back-btn" onClick={handleBack}>
+              ← Back
+            </button>
+            
+            <div className="admin-avatar">
+              🔐
+            </div>
+            <h2 className="welcome-name">Admin Login</h2>
+
+            <form onSubmit={handleAdminSubmit} className="admin-form">
+              <div className="form-group">
+                <label>Username</label>
+                <input
+                  type="text"
+                  value={adminUsername}
+                  onChange={(e) => {
+                    setAdminUsername(e.target.value);
+                    setError('');
+                  }}
+                  className="admin-input"
+                  placeholder="Enter username"
+                  autoFocus
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Password</label>
+                <input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => {
+                    setAdminPassword(e.target.value);
+                    setError('');
+                  }}
+                  className="admin-input"
+                  placeholder="Enter password"
+                />
+              </div>
+              
+              {error && <p className="pin-error">{error}</p>}
+              
+              <button 
+                type="submit" 
+                className="login-btn"
+                disabled={!adminUsername || !adminPassword}
+              >
+                Sign In as Admin
+              </button>
+            </form>
+          </div>
+        ) : !selectedMember ? (
           // Member selection screen
           <div className="member-selection">
-            <div className="member-grid">
-              {FAMILY_MEMBERS.map(member => (
-                <button
-                  key={member.id}
-                  className="member-card"
-                  onClick={() => handleMemberSelect(member)}
-                >
-                  <div 
-                    className="member-avatar-large"
-                    style={{ backgroundColor: member.color }}
+            {membersWithAccess.length > 0 ? (
+              <div className="member-grid">
+                {membersWithAccess.map(member => (
+                  <button
+                    key={member.id}
+                    className="member-card"
+                    onClick={() => handleMemberSelect(member)}
                   >
-                    {member.name.charAt(0)}
-                  </div>
-                  <span className="member-name-card">{member.name}</span>
-                </button>
-              ))}
-            </div>
+                    <div 
+                      className="member-avatar-large"
+                      style={{ backgroundColor: member.color }}
+                    >
+                      {member.name.charAt(0)}
+                    </div>
+                    <span className="member-name-card">{member.name}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="no-users-message">
+                <p>No users have been set up yet.</p>
+                <p>Please contact an admin to create user accounts.</p>
+              </div>
+            )}
+            
+            <button 
+              className="admin-link-btn"
+              onClick={() => setShowAdminLogin(true)}
+            >
+              🔐 Admin Login
+            </button>
           </div>
         ) : (
-          // PIN entry screen
+          // Password entry screen
           <div className="pin-entry">
             <button className="back-btn" onClick={handleBack}>
               ← Back
@@ -83,22 +165,18 @@ function LoginPage() {
               {selectedMember.name.charAt(0)}
             </div>
             <h2 className="welcome-name">Hi, {selectedMember.name}!</h2>
-            <p className="pin-prompt">Enter your 4-digit PIN</p>
+            <p className="pin-prompt">Enter your password</p>
 
-            <form onSubmit={handlePinSubmit} className="pin-form">
+            <form onSubmit={handlePasswordSubmit} className="pin-form">
               <input
                 type="password"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={4}
-                value={pin}
+                value={password}
                 onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  setPin(val);
+                  setPassword(e.target.value);
                   setError('');
                 }}
-                className="pin-input"
-                placeholder="• • • •"
+                className="password-input"
+                placeholder="Enter password"
                 autoFocus
               />
               
@@ -107,7 +185,7 @@ function LoginPage() {
               <button 
                 type="submit" 
                 className="login-btn"
-                disabled={pin.length !== 4}
+                disabled={!password}
               >
                 Sign In
               </button>

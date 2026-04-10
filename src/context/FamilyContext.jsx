@@ -339,10 +339,36 @@ export function FamilyProvider({ children }) {
   };
 
   // Family member functions
-  const updateFamilyMember = async (memberId, newName) => {
+  const updateFamilyMember = async (memberId, updates) => {
     const updatedMembers = familyMembers.map(member => 
-      member.id === memberId ? { ...member, name: newName } : member
+      member.id === memberId ? { ...member, ...updates } : member
     );
+    
+    if (db) {
+      const familyRef = ref(db, 'familyMembers');
+      await set(familyRef, updatedMembers);
+    } else {
+      setFamilyMembers(updatedMembers);
+    }
+  };
+
+  const addFamilyMember = async (name, color) => {
+    const newId = `member${Date.now()}`;
+    const newMember = { id: newId, name, color };
+    const updatedMembers = [...familyMembers, newMember];
+    
+    if (db) {
+      const familyRef = ref(db, 'familyMembers');
+      await set(familyRef, updatedMembers);
+    } else {
+      setFamilyMembers(updatedMembers);
+    }
+    
+    return newId;
+  };
+
+  const removeFamilyMember = async (memberId) => {
+    const updatedMembers = familyMembers.filter(member => member.id !== memberId);
     
     if (db) {
       const familyRef = ref(db, 'familyMembers');
@@ -393,6 +419,8 @@ export function FamilyProvider({ children }) {
 
       // Family member functions
       updateFamilyMember,
+      addFamilyMember,
+      removeFamilyMember,
       updateAllFamilyMembers,
     }}>
       {children}

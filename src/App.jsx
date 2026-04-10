@@ -4,8 +4,8 @@ import MealPlanner from './components/MealPlanner';
 import GroceryList from './components/GroceryList';
 import EventModal from './components/EventModal';
 import MealModal from './components/MealModal';
-import SettingsModal from './components/SettingsModal';
 import LoginPage from './components/LoginPage';
+import AdminDashboard from './components/AdminDashboard';
 import { useFamily } from './context/FamilyContext';
 import { useAuth } from './context/AuthContext';
 import './App.css';
@@ -23,7 +23,6 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(formatDateLocal(new Date()));
   const [showEventModal, setShowEventModal] = useState(false);
   const [showMealModal, setShowMealModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [editingMeal, setEditingMeal] = useState(null);
   // Start with sidebar closed on mobile (width <= 768px)
@@ -33,7 +32,7 @@ function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Auth state
-  const { isLoggedIn, currentUser, logout, loading: authLoading } = useAuth();
+  const { isLoggedIn, currentUser, logout, isAdmin, loading: authLoading } = useAuth();
 
   // Update clock every second
   useEffect(() => {
@@ -93,6 +92,11 @@ function App() {
   // Show login page if not logged in
   if (!isLoggedIn) {
     return <LoginPage />;
+  }
+
+  // Show admin dashboard if admin is logged in
+  if (isAdmin) {
+    return <AdminDashboard />;
   }
 
   if (loading) {
@@ -166,13 +170,6 @@ function App() {
           >
             🚪
           </button>
-          <button 
-            className="settings-btn"
-            onClick={() => setShowSettingsModal(true)}
-            title="Settings"
-          >
-            ⚙️
-          </button>
         </div>
       </header>
 
@@ -231,13 +228,6 @@ function App() {
           <div className="sidebar-section">
             <div className="sidebar-section-header">
               <h3>Family Members</h3>
-              <button 
-                className="edit-link"
-                onClick={() => setShowSettingsModal(true)}
-                title="Edit family members"
-              >
-                Edit
-              </button>
             </div>
             <div className="family-list">
               {FAMILY_MEMBERS.map(member => (
@@ -315,12 +305,6 @@ function App() {
         />
       )}
 
-      {showSettingsModal && (
-        <SettingsModal 
-          onClose={() => setShowSettingsModal(false)}
-        />
-      )}
-
       {/* Mobile Bottom Navigation */}
       <nav className="mobile-bottom-nav">
         <button 
@@ -350,13 +334,6 @@ function App() {
         >
           <span className="mobile-nav-icon">🛒</span>
           <span className="mobile-nav-label">Grocery</span>
-        </button>
-        <button 
-          className="mobile-nav-btn"
-          onClick={() => setShowSettingsModal(true)}
-        >
-          <span className="mobile-nav-icon">⚙️</span>
-          <span className="mobile-nav-label">Settings</span>
         </button>
       </nav>
     </div>

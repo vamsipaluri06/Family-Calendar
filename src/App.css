@@ -2262,3 +2262,365 @@
     display: none;
   }
 }
+
+/* Admin Dashboard Styles */
+.admin-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+}
+
+.admin-icon {
+  font-size: 32px;
+}
+
+.admin-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.admin-logout {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  padding: 10px 20px !important;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.admin-logout:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.admin-message {
+  padding: 16px 32px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.admin-message.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.admin-message.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.admin-content {
+  padding: 32px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.admin-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.member-card-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.member-avatar-admin {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.member-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.member-details .member-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.access-status {
+  font-size: 13px;
+}
+
+.access-status.has-access {
+  color: var(--success);
+}
+
+.access-status.no-access {
+  color: var(--text-muted);
+}
+
+.password-display {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.member-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-sm {
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+}
+
+.btn-warning {
+  background: var(--warning) !important;
+  color: #333 !important;
+}
+
+.btn-warning:hover {
+  filter: brightness(0.9);
+}
+
+.member-form-card {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.member-form-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+}
+
+.member-edit-form {
+  width: 100%;
+}
+
+.color-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-option {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+}
+
+.color-option.selected {
+  border-color: #333;
+  transform: scale(1.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.admin-settings-form {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.current-admin-info {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.current-admin-info p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+/* Admin Login Styles */
+.admin-login {
+  text-align: center;
+}
+
+.admin-avatar {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.admin-form .form-group {
+  text-align: left;
+}
+
+.admin-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: white;
+}
+
+.admin-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.admin-link-btn {
+  margin-top: 24px;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-link-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: white;
+}
+
+.no-users-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.no-users-message p {
+  margin: 8px 0;
+}
+
+.password-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.password-input:focus {
+  outline: none;
+  border-color: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive Admin Dashboard */
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 16px;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .admin-content {
+    padding: 16px;
+  }
+  
+  .admin-section {
+    padding: 16px;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .member-card-admin {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .member-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
