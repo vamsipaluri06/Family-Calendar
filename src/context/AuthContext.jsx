@@ -7,7 +7,7 @@ const AuthContext = createContext();
 // Default admin credentials
 const DEFAULT_ADMIN = {
   username: 'admin',
-  password: 'admin123',
+  password: '1Admin1@3',
   role: 'admin'
 };
 

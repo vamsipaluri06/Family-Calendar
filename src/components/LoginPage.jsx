@@ -143,13 +143,6 @@ function LoginPage() {
                 <p>Please contact an admin to create user accounts.</p>
               </div>
             )}
-            
-            <button 
-              className="admin-link-btn"
-              onClick={() => setShowAdminLogin(true)}
-            >
-              🔐 Admin Login
-            </button>
           </div>
         ) : (
           // Password entry screen
@@ -196,6 +189,15 @@ function LoginPage() {
         <div className="login-footer">
           <p>🔒 Your family's private calendar</p>
         </div>
+        
+        {!showAdminLogin && !selectedMember && (
+          <button 
+            className="admin-link-btn"
+            onClick={() => setShowAdminLogin(true)}
+          >
+            🔐 Admin Login
+          </button>
+        )}
       </div>
     </div>
   );
