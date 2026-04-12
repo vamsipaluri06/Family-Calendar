@@ -19,12 +19,63 @@ const MEAL_TYPES = [
   { id: 'dinner', name: 'Dinner', icon: '🌙', time: '20:00' },
 ];
 
+// Credit card reward categories
+const REWARD_CATEGORIES = [
+  { id: 'groceries', name: 'Groceries', icon: '🛒', stores: ['costco', 'winco', 'kroger', 'wholefoods', 'walmart', 'target'] },
+  { id: 'online', name: 'Online Shopping', icon: '💻', stores: ['amazon'] },
+  { id: 'wholesale', name: 'Wholesale Clubs', icon: '📦', stores: ['costco'] },
+  { id: 'dining', name: 'Dining', icon: '🍽️', stores: [] },
+  { id: 'gas', name: 'Gas Stations', icon: '⛽', stores: [] },
+  { id: 'travel', name: 'Travel', icon: '✈️', stores: [] },
+  { id: 'drugstore', name: 'Drugstores', icon: '💊', stores: [] },
+  { id: 'streaming', name: 'Streaming Services', icon: '📺', stores: [] },
+  { id: 'all', name: 'All Purchases', icon: '💳', stores: ['amazon', 'costco', 'winco', 'indian', 'walmart', 'target', 'kroger', 'wholefoods', 'misc'] },
+];
+
+// Store to category mappings
+const STORE_CATEGORIES = {
+  amazon: ['online', 'all'],
+  costco: ['groceries', 'wholesale', 'all'],
+  winco: ['groceries', 'all'],
+  indian: ['groceries', 'all'],
+  walmart: ['groceries', 'all'],
+  target: ['groceries', 'all'],
+  kroger: ['groceries', 'all'],
+  wholefoods: ['groceries', 'all'],
+  misc: ['all'],
+};
+
+// Store payment restrictions
+// acceptedNetworks: which card networks are accepted (visa, mastercard, amex, discover)
+// noCreditCards: true if store doesn't accept credit cards (cash/debit only)
+const STORE_PAYMENT_RULES = {
+  costco: { 
+    acceptedNetworks: ['visa'], 
+    note: 'Only Visa cards accepted' 
+  },
+  winco: { 
+    noCreditCards: true, 
+    note: 'Cash or Debit only - No credit cards' 
+  },
+};
+
+// Map banks to their card networks
+const BANK_CARD_NETWORKS = {
+  chase: 'visa',
+  citi: 'visa',      // Most Citi cards are Visa or Mastercard
+  boa: 'visa',       // Most BOA cards are Visa
+  amex: 'amex',
+  discover: 'discover',
+  other: 'unknown',
+};
+
 export function FamilyProvider({ children }) {
   const [events, setEvents] = useState([]);
   const [meals, setMeals] = useState({});
   const [groceryItems, setGroceryItems] = useState([]);
   const [storeExpenses, setStoreExpenses] = useState([]);
   const [familyMembers, setFamilyMembers] = useState(DEFAULT_FAMILY_MEMBERS);
+  const [creditCards, setCreditCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFirebaseConnected, setIsFirebaseConnected] = useState(false);
 
@@ -95,12 +146,28 @@ export function FamilyProvider({ children }) {
         }
       });
 
+      // Listen to credit cards
+      const creditCardsRef = ref(db, 'creditCards');
+      const unsubCreditCards = onValue(creditCardsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const cardsArray = Object.entries(data).map(([id, card]) => ({
+            ...card,
+            id
+          }));
+          setCreditCards(cardsArray);
+        } else {
+          setCreditCards([]);
+        }
+      });
+
       return () => {
         unsubEvents();
         unsubMeals();
         unsubGrocery();
         unsubFamily();
         unsubExpenses();
+        unsubCreditCards();
       };
     } else {
       // Fallback to localStorage
@@ -109,12 +176,14 @@ export function FamilyProvider({ children }) {
       const savedGrocery = localStorage.getItem('familyCalendarGrocery');
       const savedFamily = localStorage.getItem('familyCalendarMembers');
       const savedExpenses = localStorage.getItem('familyCalendarExpenses');
+      const savedCreditCards = localStorage.getItem('familyCalendarCreditCards');
       
       if (savedEvents) setEvents(JSON.parse(savedEvents));
       if (savedMeals) setMeals(JSON.parse(savedMeals));
       if (savedGrocery) setGroceryItems(JSON.parse(savedGrocery));
       if (savedFamily) setFamilyMembers(JSON.parse(savedFamily));
       if (savedExpenses) setStoreExpenses(JSON.parse(savedExpenses));
+      if (savedCreditCards) setCreditCards(JSON.parse(savedCreditCards));
       
       setLoading(false);
     }
@@ -128,8 +197,9 @@ export function FamilyProvider({ children }) {
       localStorage.setItem('familyCalendarGrocery', JSON.stringify(groceryItems));
       localStorage.setItem('familyCalendarMembers', JSON.stringify(familyMembers));
       localStorage.setItem('familyCalendarExpenses', JSON.stringify(storeExpenses));
+      localStorage.setItem('familyCalendarCreditCards', JSON.stringify(creditCards));
     }
-  }, [events, meals, groceryItems, familyMembers, storeExpenses, isFirebaseConnected, loading]);
+  }, [events, meals, groceryItems, familyMembers, storeExpenses, creditCards, isFirebaseConnected, loading]);
 
   // Helper function to generate recurring event dates
   const generateRecurringDates = (startDate, endDate, recurringType) => {
@@ -478,6 +548,139 @@ export function FamilyProvider({ children }) {
     return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
   };
 
+  // Credit card functions
+  const addCreditCard = async (card) => {
+    // card: { name, lastFourDigits, color, rewards: [{ categoryId, rewardRate }] }
+    if (db) {
+      const cardsRef = ref(db, 'creditCards');
+      await push(cardsRef, { ...card, createdAt: Date.now() });
+    } else {
+      const newCard = { ...card, id: Date.now().toString(), createdAt: Date.now() };
+      setCreditCards(prev => [...prev, newCard]);
+    }
+  };
+
+  const updateCreditCard = async (id, updates) => {
+    if (db) {
+      const cardRef = ref(db, `creditCards/${id}`);
+      await update(cardRef, updates);
+    } else {
+      setCreditCards(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    }
+  };
+
+  const removeCreditCard = async (id) => {
+    if (db) {
+      const cardRef = ref(db, `creditCards/${id}`);
+      await remove(cardRef);
+    } else {
+      setCreditCards(prev => prev.filter(c => c.id !== id));
+    }
+  };
+
+  // Check if a card is accepted at a store based on payment rules
+  const isCardAcceptedAtStore = (card, storeId) => {
+    const rules = STORE_PAYMENT_RULES[storeId];
+    if (!rules) return true; // No restrictions
+    
+    // Store doesn't accept credit cards at all
+    if (rules.noCreditCards) return false;
+    
+    // Check card network restrictions
+    if (rules.acceptedNetworks) {
+      const cardNetwork = BANK_CARD_NETWORKS[card.bank] || 'unknown';
+      // If network is unknown, we can't determine - allow it with a warning
+      if (cardNetwork === 'unknown') return true;
+      return rules.acceptedNetworks.includes(cardNetwork);
+    }
+    
+    return true;
+  };
+
+  // Get store payment rules/restrictions
+  const getStorePaymentRules = (storeId) => {
+    return STORE_PAYMENT_RULES[storeId] || null;
+  };
+
+  // Get best credit card for a store
+  const getBestCardForStore = (storeId) => {
+    if (!creditCards.length) return null;
+    
+    // Check if store accepts credit cards at all
+    const rules = STORE_PAYMENT_RULES[storeId];
+    if (rules?.noCreditCards) {
+      return { noCreditCards: true, note: rules.note };
+    }
+    
+    const storeCategories = STORE_CATEGORIES[storeId] || ['all'];
+    let bestCard = null;
+    let bestRate = 0;
+    let matchedCategory = null;
+    
+    creditCards.forEach(card => {
+      if (!card.rewards) return;
+      
+      // Check if this card is accepted at this store
+      if (!isCardAcceptedAtStore(card, storeId)) return;
+      
+      card.rewards.forEach(reward => {
+        // Check if this reward category applies to this store
+        if (storeCategories.includes(reward.categoryId)) {
+          const rate = parseFloat(reward.rewardRate) || 0;
+          if (rate > bestRate) {
+            bestRate = rate;
+            bestCard = card;
+            matchedCategory = REWARD_CATEGORIES.find(c => c.id === reward.categoryId);
+          }
+        }
+      });
+    });
+    
+    return bestCard ? { card: bestCard, rewardRate: bestRate, category: matchedCategory } : null;
+  };
+
+  // Get all card rewards for a store (sorted by reward rate)
+  const getAllCardsForStore = (storeId) => {
+    if (!creditCards.length) return [];
+    
+    // Check if store accepts credit cards at all
+    const rules = STORE_PAYMENT_RULES[storeId];
+    if (rules?.noCreditCards) return [];
+    
+    const storeCategories = STORE_CATEGORIES[storeId] || ['all'];
+    const cardRewards = [];
+    
+    creditCards.forEach(card => {
+      if (!card.rewards) return;
+      
+      // Check if this card is accepted at this store
+      if (!isCardAcceptedAtStore(card, storeId)) return;
+      
+      let bestRewardForCard = 0;
+      let bestCategoryForCard = null;
+      
+      card.rewards.forEach(reward => {
+        if (storeCategories.includes(reward.categoryId)) {
+          const rate = parseFloat(reward.rewardRate) || 0;
+          if (rate > bestRewardForCard) {
+            bestRewardForCard = rate;
+            bestCategoryForCard = REWARD_CATEGORIES.find(c => c.id === reward.categoryId);
+          }
+        }
+      });
+      
+      if (bestRewardForCard > 0) {
+        cardRewards.push({
+          card,
+          rewardRate: bestRewardForCard,
+          category: bestCategoryForCard
+        });
+      }
+    });
+    
+    return cardRewards.sort((a, b) => b.rewardRate - a.rewardRate);
+  };
+
   return (
     <FamilyContext.Provider value={{
       // Data
@@ -485,12 +688,15 @@ export function FamilyProvider({ children }) {
       meals,
       groceryItems,
       storeExpenses,
+      creditCards,
       loading,
       isFirebaseConnected,
       
       // Constants
       FAMILY_MEMBERS: familyMembers,
       MEAL_TYPES,
+      REWARD_CATEGORIES,
+      STORE_CATEGORIES,
       
       // Event functions
       addEvent,
@@ -518,6 +724,14 @@ export function FamilyProvider({ children }) {
       getMonthlyTotal,
       getAnnualTotal,
       getAllStoresAnnualTotal,
+
+      // Credit card functions
+      addCreditCard,
+      updateCreditCard,
+      removeCreditCard,
+      getBestCardForStore,
+      getAllCardsForStore,
+      getStorePaymentRules,
 
       // Family member functions
       updateFamilyMember,

@@ -14,7 +14,8 @@ const GROCERY_STORES = [
   { id: 'walmart', name: 'Walmart', logo: `${BASE_URL}Logos/walmart.webp`, color: '#0071CE' },
   { id: 'target', name: 'Target', logo: `${BASE_URL}Logos/Target.webp`, color: '#CC0000' },
   { id: 'kroger', name: 'Kroger', logo: `${BASE_URL}Logos/kroger.jpg`, color: '#D71920' },
-  { id: 'wholefoods', name: 'Whole Foods', logo: `${BASE_URL}Logos/wholefoods.webp`, color: '#00674B' }
+  { id: 'wholefoods', name: 'Whole Foods', logo: `${BASE_URL}Logos/wholefoods.webp`, color: '#00674B' },
+  { id: 'misc', name: 'Miscellaneous', logo: null, emoji: '📦', color: '#6B7280' }
 ];
 
 function ExpenseSummary() {

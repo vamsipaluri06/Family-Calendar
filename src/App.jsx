@@ -3,6 +3,7 @@ import Calendar from './components/Calendar';
 import MealPlanner from './components/MealPlanner';
 import GroceryList from './components/GroceryList';
 import ExpenseSummary from './components/ExpenseSummary';
+import CreditCards from './components/CreditCards';
 import EventModal from './components/EventModal';
 import MealModal from './components/MealModal';
 import LoginPage from './components/LoginPage';
@@ -226,6 +227,16 @@ function App() {
               <span className="nav-icon">🛒</span>
               <span>Grocery List</span>
             </button>
+            <button 
+              className={`nav-item ${activeView === 'creditcards' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveView('creditcards');
+                if (window.innerWidth <= 768) setSidebarOpen(false);
+              }}
+            >
+              <span className="nav-icon">💳</span>
+              <span>Credit Cards</span>
+            </button>
           </nav>
 
           <div className="sidebar-section">
@@ -289,6 +300,9 @@ function App() {
           )}
           {activeView === 'grocery' && (
             <GroceryList />
+          )}
+          {activeView === 'creditcards' && (
+            <CreditCards />
           )}
           {activeView === 'expenses' && (
             <ExpenseSummary />

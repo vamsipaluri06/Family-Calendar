@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useFamily } from '../context/FamilyContext';
+import ExpenseModal from './ExpenseModal';
 
 // Base URL for Vite public assets
 const BASE_URL = import.meta.env.BASE_URL || '/';
@@ -54,6 +55,13 @@ const GROCERY_STORES = [
     name: 'Whole Foods', 
     logo: `${BASE_URL}Logos/wholefoods.webp`,
     color: '#00674B'
+  },
+  { 
+    id: 'misc', 
+    name: 'Miscellaneous', 
+    logo: null,
+    emoji: '📦',
+    color: '#6B7280'
   }
 ];
 
@@ -64,13 +72,16 @@ function GroceryList() {
     toggleGroceryItem, 
     removeGroceryItem,
     clearCheckedGroceryItems,
-    updateGroceryItem
+    updateGroceryItem,
+    getBestCardForStore,
+    getStorePaymentRules
   } = useFamily();
   
   const [selectedStore, setSelectedStore] = useState(null);
   const [newItem, setNewItem] = useState('');
   const [showChecked, setShowChecked] = useState(true);
   const [showUncategorized, setShowUncategorized] = useState(false);
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
 
   // Group items by store
   const itemsByStore = useMemo(() => {
@@ -127,7 +138,8 @@ function GroceryList() {
           {GROCERY_STORES.map(store => {
             const pendingCount = getStoreCount(store.id);
             const totalCount = getTotalPendingCount(store.id);
-            
+            const bestCard = getBestCardForStore(store.id);
+            const paymentRules = getStorePaymentRules(store.id);
             
             return (
               <button
@@ -161,6 +173,40 @@ function GroceryList() {
                   </span>
                 </div>
                 <span className="store-name">{store.name}</span>
+                {/* Show payment restriction or card recommendation */}
+                {bestCard?.noCreditCards ? (
+                  <div className="store-payment-restriction">
+                    <span className="restriction-badge cash-only">
+                      💵 Cash/Debit
+                    </span>
+                  </div>
+                ) : paymentRules?.acceptedNetworks ? (
+                  <div className="store-card-recommendation">
+                    {bestCard?.card ? (
+                      <>
+                        <span 
+                          className="recommended-card-chip"
+                          style={{ backgroundColor: bestCard.card.color }}
+                        >
+                          💳 {bestCard.rewardRate}%
+                        </span>
+                        <span className="recommended-card-name">{bestCard.card.name}</span>
+                      </>
+                    ) : (
+                      <span className="restriction-note">Visa only</span>
+                    )}
+                  </div>
+                ) : bestCard?.card && (
+                  <div className="store-card-recommendation">
+                    <span 
+                      className="recommended-card-chip"
+                      style={{ backgroundColor: bestCard.card.color }}
+                    >
+                      💳 {bestCard.rewardRate}%
+                    </span>
+                    <span className="recommended-card-name">{bestCard.card.name}</span>
+                  </div>
+                )}
                 {totalCount > 0 && (
                   <div className="store-badge">
                     {pendingCount > 0 ? pendingCount : '✓'}
@@ -217,6 +263,10 @@ function GroceryList() {
     );
   }
 
+  // Get best card for selected store
+  const selectedStoreBestCard = selectedStore ? getBestCardForStore(selectedStore.id) : null;
+  const selectedStorePaymentRules = selectedStore ? getStorePaymentRules(selectedStore.id) : null;
+
   // Store Items View
   return (
     <div className="grocery-list">
@@ -238,8 +288,68 @@ function GroceryList() {
         </div>
         <div className="grocery-stats">
           <span className="stat pending">{pendingItems.length} to buy</span>
+          <button 
+            className="btn-add-expense"
+            onClick={() => setShowExpenseModal(true)}
+            style={{ backgroundColor: selectedStore.color }}
+          >
+            💰 Add Expense
+          </button>
         </div>
       </div>
+
+      {/* Payment Info Banner */}
+      {selectedStoreBestCard?.noCreditCards ? (
+        // Store doesn't accept credit cards (like WinCo)
+        <div className="payment-restriction-banner cash-only">
+          <div className="banner-content">
+            <span className="banner-icon">💵</span>
+            <div className="banner-text">
+              <span className="banner-label">Payment Restriction</span>
+              <span className="banner-card-name">Cash or Debit Card Only</span>
+            </div>
+          </div>
+          <span className="restriction-note">No credit cards accepted at this store</span>
+        </div>
+      ) : selectedStoreBestCard?.card ? (
+        // Has a recommended card
+        <div 
+          className="credit-card-banner"
+          style={{ backgroundColor: selectedStoreBestCard.card.color }}
+        >
+          <div className="banner-content">
+            <span className="banner-icon">💳</span>
+            <div className="banner-text">
+              <span className="banner-label">Use this card for best rewards:</span>
+              <span className="banner-card-name">{selectedStoreBestCard.card.name}</span>
+            </div>
+            <div className="banner-reward">
+              <span className="reward-rate">{selectedStoreBestCard.rewardRate}%</span>
+              <span className="reward-category">{selectedStoreBestCard.category?.name || 'cashback'}</span>
+            </div>
+          </div>
+          <div className="banner-bottom">
+            {selectedStoreBestCard.card.lastFourDigits && (
+              <span className="banner-digits">•••• {selectedStoreBestCard.card.lastFourDigits}</span>
+            )}
+            {selectedStorePaymentRules?.acceptedNetworks && (
+              <span className="banner-network-note">⚠️ {selectedStorePaymentRules.note}</span>
+            )}
+          </div>
+        </div>
+      ) : selectedStorePaymentRules?.acceptedNetworks && (
+        // Only network restriction shown (no valid card)
+        <div className="payment-restriction-banner visa-only">
+          <div className="banner-content">
+            <span className="banner-icon">💳</span>
+            <div className="banner-text">
+              <span className="banner-label">Payment Restriction</span>
+              <span className="banner-card-name">{selectedStorePaymentRules.note}</span>
+            </div>
+          </div>
+          <span className="restriction-note">Add a Visa card to see recommendations</span>
+        </div>
+      )}
 
       {/* Add Item Form */}
       <form onSubmit={handleAddItem} className="add-item-form">
@@ -336,6 +446,14 @@ function GroceryList() {
             </ul>
           )}
         </div>
+      )}
+
+      {/* Expense Modal */}
+      {showExpenseModal && selectedStore && (
+        <ExpenseModal 
+          store={selectedStore}
+          onClose={() => setShowExpenseModal(false)}
+        />
       )}
     </div>
   );
