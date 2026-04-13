@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFamily } from '../context/FamilyContext';
+import TimePicker from './TimePicker';
 
 function EventModal({ event, selectedDate, onClose }) {
   const { addEvent, updateEvent, deleteEvent, FAMILY_MEMBERS } = useFamily();
@@ -11,13 +12,34 @@ function EventModal({ event, selectedDate, onClose }) {
     return date.toISOString().split('T')[0];
   };
 
+  // Get current time rounded to nearest 5 minutes
+  const getCurrentTime = () => {
+    const now = new Date();
+    const minutes = Math.ceil(now.getMinutes() / 5) * 5;
+    now.setMinutes(minutes);
+    const hours = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes() % 60).padStart(2, '0');
+    return `${hours}:${mins}`;
+  };
+
+  // Get time 30 minutes from a given time string
+  const getEndTime = (startTime) => {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes + 30, 0, 0);
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  };
+
+  const defaultStartTime = getCurrentTime();
+  const defaultEndTime = getEndTime(defaultStartTime);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     start: selectedDate,
-    startTime: '09:00',
+    startTime: defaultStartTime,
     end: selectedDate,
-    endTime: '10:00',
+    endTime: defaultEndTime,
     allDay: false,
     memberIds: [FAMILY_MEMBERS[0].id], // Array for multiple family members
     recurring: 'none', // 'none', 'daily', 'weekly', 'monthly', 'annually'
@@ -129,6 +151,26 @@ function EventModal({ event, selectedDate, onClose }) {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // If start time changes, auto-set end time to 30 minutes later
+    if (name === 'startTime') {
+      const [hours, minutes] = value.split(':').map(Number);
+      const startDate = new Date();
+      startDate.setHours(hours, minutes, 0, 0);
+      startDate.setMinutes(startDate.getMinutes() + 30);
+      
+      const endHours = String(startDate.getHours()).padStart(2, '0');
+      const endMinutes = String(startDate.getMinutes()).padStart(2, '0');
+      const newEndTime = `${endHours}:${endMinutes}`;
+      
+      setFormData(prev => ({
+        ...prev,
+        startTime: value,
+        endTime: newEndTime
+      }));
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -228,13 +270,11 @@ function EventModal({ event, selectedDate, onClose }) {
             </div>
             {!formData.allDay && (
               <div className="form-group">
-                <label htmlFor="startTime">Start Time</label>
-                <input
-                  type="time"
-                  id="startTime"
-                  name="startTime"
+                <label>Start Time</label>
+                <TimePicker
                   value={formData.startTime}
                   onChange={handleChange}
+                  label="Start Time"
                 />
               </div>
             )}
@@ -254,13 +294,11 @@ function EventModal({ event, selectedDate, onClose }) {
             </div>
             {!formData.allDay && (
               <div className="form-group">
-                <label htmlFor="endTime">End Time</label>
-                <input
-                  type="time"
-                  id="endTime"
-                  name="endTime"
+                <label>End Time</label>
+                <TimePicker
                   value={formData.endTime}
                   onChange={handleChange}
+                  label="End Time"
                 />
               </div>
             )}
