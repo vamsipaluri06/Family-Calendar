@@ -1,6 +1,8 @@
 # 👨‍👩‍👧 Family Calendar
 
-A beautiful, feature-rich family calendar application with meal planning, grocery lists, and member authentication. Built with React and designed with a stunning rainbow gradient theme.
+A beautiful, feature-rich family calendar application with meal planning, grocery lists, expense tracking, and member authentication. Built with React and designed with a stunning rainbow gradient theme.
+
+**Current Version: 2.1.0** | [View Changelog](#-changelog)
 
 ## ✨ Features
 
@@ -12,8 +14,20 @@ A beautiful, feature-rich family calendar application with meal planning, grocer
 - 🔄 **Sync Across Devices** - Real-time sync with Firebase Realtime Database
 - 📱 **Mobile-First Design** - Fully responsive with bottom navigation for phones
 
-### Authentication & Personalization
+### 📱 PWA Support (New in v2.1.0)
+- 📲 **Install as App** - Add to home screen on iPhone, Android, or desktop
+- 🔄 **Offline Caching** - Works offline with service worker
+- 🎨 **Custom App Icon** - Beautiful icon on your home screen
+- ⚡ **Fast Loading** - Cached assets for instant startup
+
+### 💰 Finance & Expense Tracking
+- 💳 **Credit Cards** - Track rewards and payment due dates
+- 🏠 **Monthly Utilities** - Track Rent, Electricity, Internet, Mobile bills
+- 💵 **Expense Tracking** - Log expenses by store with full history
+
+### Authentication & Security
 - 🔐 **User Login** - PIN-based authentication for each family member
+- 🔒 **Password Hashing** - SHA-256 encrypted passwords (v2.0.0+)
 - 👤 **Personal Profiles** - Each member has their own avatar and color
 - 👍👎 **Meal Voting** - Like/dislike meals with per-user tracking
 - 🚪 **Logout** - Easy sign-out from the header
@@ -80,24 +94,35 @@ To sync data across devices:
 Family-Calendar/
 ├── src/
 │   ├── components/
-│   │   ├── Calendar.jsx       # Main calendar with meal popup & voting
-│   │   ├── MealPlanner.jsx    # Week/day meal planning views
-│   │   ├── GroceryList.jsx    # Shopping list management
-│   │   ├── EventModal.jsx     # Add/edit calendar events
-│   │   ├── MealModal.jsx      # Add/edit meals with voting
-│   │   ├── SettingsModal.jsx  # Family member settings
-│   │   └── LoginPage.jsx      # User authentication screen
+│   │   ├── Calendar.jsx         # Main calendar with meal popup & voting
+│   │   ├── MealPlanner.jsx      # Week/day meal planning views
+│   │   ├── GroceryList.jsx      # Shopping list management
+│   │   ├── CreditCards.jsx      # Credit card rewards tracker
+│   │   ├── MonthlyUtilities.jsx # Monthly bills tracking
+│   │   ├── ExpenseSummary.jsx   # Expense history by store
+│   │   ├── EventModal.jsx       # Add/edit calendar events
+│   │   ├── MealModal.jsx        # Add/edit meals with voting
+│   │   ├── ExpenseModal.jsx     # Add/edit expenses
+│   │   ├── UtilityModal.jsx     # Add/edit utility bills
+│   │   ├── SettingsModal.jsx    # Family member settings
+│   │   ├── AdminDashboard.jsx   # Admin management panel
+│   │   ├── TimePicker.jsx       # Time selection component
+│   │   └── LoginPage.jsx        # User authentication & PWA install
 │   ├── context/
-│   │   ├── FamilyContext.jsx  # Global state (events, meals, members)
-│   │   └── AuthContext.jsx    # Authentication state management
-│   ├── App.jsx                # Main app with routing & layout
-│   ├── App.css                # Component-specific styles
-│   ├── index.css              # Global styles & mobile responsive
-│   ├── main.jsx               # React entry point
-│   └── firebase.js            # Firebase configuration
+│   │   ├── FamilyContext.jsx    # Global state (events, meals, expenses, utilities)
+│   │   └── AuthContext.jsx      # Authentication with password hashing
+│   ├── App.jsx                  # Main app with routing & layout
+│   ├── App.css                  # Component-specific styles
+│   ├── index.css                # Global styles & mobile responsive
+│   ├── main.jsx                 # React entry point
+│   ├── version.js               # Version info & changelog
+│   └── firebase.js              # Firebase configuration
 ├── public/
-│   └── calendar.svg           # App icon
-├── index.html                 # HTML template with PWA meta tags
+│   ├── Logos/                   # App logos
+│   ├── pwa-192x192.png          # PWA icon (192x192)
+│   ├── pwa-512x512.png          # PWA icon (512x512)
+│   └── apple-touch-icon.png     # iOS home screen icon
+├── index.html                   # HTML template with PWA meta tags
 ├── package.json               # Dependencies & scripts
 ├── vite.config.js             # Vite bundler configuration
 ├── README.md                  # This file
@@ -113,7 +138,8 @@ The app is designed mobile-first with:
 - **Slide-up Modals** - Sheet-style modals optimized for touch
 - **Touch-friendly** - 44px minimum tap targets
 - **Safe Area Support** - Works on notched phones (iPhone X+)
-- **PWA Ready** - Can be added to home screen
+- **PWA Install Button** - Easy one-tap install from login screen
+- **Offline Support** - Works without internet after first load
 
 ## 🎨 Customization
 
@@ -182,6 +208,32 @@ const FAMILY_MEMBERS = [
 - **[README.md](README.md)** - This file (quick start & features)
 - **[TECHNICAL.md](TECHNICAL.md)** - Detailed technical architecture & implementation
 
-## 📝 License
+## � Changelog
+
+### v2.1.0 (April 14, 2026)
+- 📱 PWA Support - Install as app on iPhone/Android/Desktop
+- 🔄 Offline caching with service worker
+- 🎨 Custom app icon for home screen
+- 📲 Install button on login screen with manual instructions
+
+### v2.0.0 (April 14, 2026)
+- 🔒 Added password hashing for security (SHA-256)
+- 🏠 Added Monthly Utilities tracking (Rent, Electricity, Internet, Mobile)
+- 🐛 Fixed timezone bug for utility date handling
+- 📱 Improved mobile navigation
+
+### v1.5.0 (April 13, 2026)
+- 💳 Added Credit Cards rewards tracker
+- 💰 Added Expense tracking by store
+- 🛒 Added Grocery List with store selection
+
+### v1.0.0 (April 1, 2026)
+- 📅 Initial release
+- 👨‍👩‍👧 Family member management
+- 🍽️ Meal planning feature
+- 📱 Mobile-responsive design
+- 🔥 Firebase real-time sync
+
+## �📝 License
 
 Free for personal use. Built with ❤️ for families.
