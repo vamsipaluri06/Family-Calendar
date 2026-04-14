@@ -4,10 +4,19 @@ import { ref, onValue, set, update, remove } from 'firebase/database';
 
 const AuthContext = createContext();
 
-// Default admin credentials
+// Simple hash function for password security (SHA-256)
+const hashPassword = async (password) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + 'FamilyCalendarSalt2024');
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+// Default admin credentials (hashed)
 const DEFAULT_ADMIN = {
   username: 'admin',
-  password: '1Admin1@3',
+  passwordHash: '', // Will be set on first save
   role: 'admin'
 };
 
@@ -93,9 +102,15 @@ export function AuthProvider({ children }) {
     localStorage.setItem('familyCalendarUser', JSON.stringify(userWithRole));
   };
 
-  // Login for admin
-  const adminLogin = (username, password) => {
-    if (username === adminCredentials.username && password === adminCredentials.password) {
+  // Login for admin (with password hashing)
+  const adminLogin = async (username, password) => {
+    if (username !== adminCredentials.username) return false;
+    
+    // Hash the entered password for comparison
+    const hashedInput = await hashPassword(password);
+    
+    // Support both legacy (plain text) and new (hashed) passwords
+    if (adminCredentials.passwordHash === hashedInput || adminCredentials.password === password) {
       const admin = { ...adminCredentials, role: 'admin', name: 'Admin' };
       setCurrentUser(admin);
       localStorage.setItem('familyCalendarUser', JSON.stringify(admin));
@@ -104,11 +119,16 @@ export function AuthProvider({ children }) {
     return false;
   };
 
-  // Verify user password
-  const verifyUserPassword = (memberId, password) => {
+  // Verify user password (with hashing support)
+  const verifyUserPassword = async (memberId, password) => {
     const userRecord = users[memberId];
     if (!userRecord) return false;
-    return userRecord.password === password;
+    
+    // Hash the entered password for comparison
+    const hashedInput = await hashPassword(password);
+    
+    // Support both legacy (plain text) and new (hashed) passwords
+    return userRecord.passwordHash === hashedInput || userRecord.password === password;
   };
 
   // Logout
@@ -117,9 +137,11 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('familyCalendarUser');
   };
 
-  // Admin functions - Set user password
+  // Admin functions - Set user password (with hashing)
   const setUserPassword = async (memberId, password, memberName) => {
-    const userData = { password, memberName, memberId };
+    // Hash the password before storing
+    const passwordHash = await hashPassword(password);
+    const userData = { passwordHash, memberName, memberId };
     if (db) {
       const userRef = ref(db, `users/${memberId}`);
       await set(userRef, userData);
@@ -142,9 +164,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Admin functions - Update admin credentials
+  // Admin functions - Update admin credentials (with hashing)
   const updateAdminCredentials = async (username, password) => {
-    const newCreds = { username, password, role: 'admin' };
+    // Hash the password before storing
+    const passwordHash = await hashPassword(password);
+    const newCreds = { username, passwordHash, role: 'admin' };
     if (db) {
       const adminRef = ref(db, 'adminCredentials');
       await set(adminRef, newCreds);

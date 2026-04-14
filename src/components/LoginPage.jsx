@@ -21,10 +21,11 @@ function LoginPage() {
     setError('');
   };
 
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     
-    if (verifyUserPassword(selectedMember.id, password)) {
+    const isValid = await verifyUserPassword(selectedMember.id, password);
+    if (isValid) {
       login(selectedMember);
     } else {
       setError('Incorrect password. Please try again.');
@@ -32,10 +33,11 @@ function LoginPage() {
     }
   };
 
-  const handleAdminSubmit = (e) => {
+  const handleAdminSubmit = async (e) => {
     e.preventDefault();
     
-    if (adminLogin(adminUsername, adminPassword)) {
+    const success = await adminLogin(adminUsername, adminPassword);
+    if (success) {
       // Success - redirect happens automatically
     } else {
       setError('Invalid admin credentials.');

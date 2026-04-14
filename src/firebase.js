@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
+import { getAuth } from 'firebase/auth';
 
 // Firebase configuration
 // Replace these with your Firebase project credentials
@@ -16,12 +17,14 @@ const firebaseConfig = {
 
 let app = null;
 let db = null;
+let auth = null;
 
 // Only initialize Firebase if config is provided
 if (firebaseConfig.apiKey && firebaseConfig.databaseURL) {
   try {
     app = initializeApp(firebaseConfig);
     db = getDatabase(app);
+    auth = getAuth(app);
     console.log('Firebase connected successfully');
   } catch (error) {
     console.warn('Firebase initialization failed, using localStorage:', error.message);
@@ -30,4 +33,4 @@ if (firebaseConfig.apiKey && firebaseConfig.databaseURL) {
   console.log('Firebase not configured, using localStorage for data persistence');
 }
 
-export { db };
+export { db, auth };

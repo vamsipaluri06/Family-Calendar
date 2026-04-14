@@ -123,8 +123,12 @@ function AdminDashboard() {
     }
     
     try {
-      const newPassword = adminForm.password || adminCredentials.password;
-      await updateAdminCredentials(adminForm.username, newPassword);
+      // Only update password if a new one is provided
+      if (!adminForm.password) {
+        showMessage('error', 'Please enter a new password');
+        return;
+      }
+      await updateAdminCredentials(adminForm.username, adminForm.password);
       showMessage('success', 'Admin credentials updated');
       setShowAdminSettings(false);
       setAdminForm({ username: adminForm.username, password: '', confirmPassword: '' });
@@ -138,7 +142,7 @@ function AdminDashboard() {
     setMemberForm({ 
       name: member.name, 
       color: member.color, 
-      password: users[member.id]?.password || '' 
+      password: '' // Password is hashed, so we start with empty field
     });
   };
 
@@ -294,7 +298,7 @@ function AdminDashboard() {
                         </span>
                         {users[member.id] && (
                           <span className="password-display">
-                            Password: {users[member.id].password}
+                            🔒 Password set (encrypted)
                           </span>
                         )}
                       </div>
