@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useFamily } from '../context/FamilyContext';
+import { APP_VERSION, CHANGELOG } from '../version';
 
 function LoginPage() {
   const { login, adminLogin, verifyUserPassword, users } = useAuth();
@@ -11,6 +12,7 @@ function LoginPage() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [showChangelog, setShowChangelog] = useState(false);
 
   // Get members that have passwords set
   const membersWithAccess = FAMILY_MEMBERS.filter(member => users[member.id]);
@@ -190,6 +192,12 @@ function LoginPage() {
 
         <div className="login-footer">
           <p>🔒 Your family's private calendar</p>
+          <button 
+            className="version-btn"
+            onClick={() => setShowChangelog(!showChangelog)}
+          >
+            v{APP_VERSION}
+          </button>
         </div>
         
         {!showAdminLogin && !selectedMember && (
@@ -201,6 +209,34 @@ function LoginPage() {
           </button>
         )}
       </div>
+
+      {/* Changelog Modal */}
+      {showChangelog && (
+        <div className="changelog-overlay" onClick={() => setShowChangelog(false)}>
+          <div className="changelog-modal" onClick={e => e.stopPropagation()}>
+            <div className="changelog-header">
+              <h2>📋 What's New</h2>
+              <button className="modal-close" onClick={() => setShowChangelog(false)}>×</button>
+            </div>
+            <div className="changelog-content">
+              {CHANGELOG.map((release, idx) => (
+                <div key={release.version} className={`changelog-release ${idx === 0 ? 'latest' : ''}`}>
+                  <div className="release-header">
+                    <span className="release-version">v{release.version}</span>
+                    <span className="release-date">{release.date}</span>
+                    {idx === 0 && <span className="release-badge">Latest</span>}
+                  </div>
+                  <ul className="release-changes">
+                    {release.changes.map((change, i) => (
+                      <li key={i}>{change}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
