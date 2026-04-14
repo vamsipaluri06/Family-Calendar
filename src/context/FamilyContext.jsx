@@ -45,6 +45,14 @@ const STORE_CATEGORIES = {
   misc: ['all'],
 };
 
+// Monthly utility types
+const UTILITY_TYPES = [
+  { id: 'rent', name: 'Apartment Rent', icon: '🏠', color: '#4CAF50' },
+  { id: 'electricity', name: 'Electricity', icon: '⚡', color: '#FFC107' },
+  { id: 'internet', name: 'Internet', icon: '📶', color: '#2196F3' },
+  { id: 'mobile', name: 'Mobile', icon: '📱', color: '#9C27B0' },
+];
+
 // Store payment restrictions
 // acceptedNetworks: which card networks are accepted (visa, mastercard, amex, discover)
 // noCreditCards: true if store doesn't accept credit cards (cash/debit only)
@@ -76,6 +84,7 @@ export function FamilyProvider({ children }) {
   const [storeExpenses, setStoreExpenses] = useState([]);
   const [familyMembers, setFamilyMembers] = useState(DEFAULT_FAMILY_MEMBERS);
   const [creditCards, setCreditCards] = useState([]);
+  const [utilityBills, setUtilityBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFirebaseConnected, setIsFirebaseConnected] = useState(false);
 
@@ -161,6 +170,21 @@ export function FamilyProvider({ children }) {
         }
       });
 
+      // Listen to utility bills
+      const utilityBillsRef = ref(db, 'utilityBills');
+      const unsubUtilityBills = onValue(utilityBillsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const billsArray = Object.entries(data).map(([id, bill]) => ({
+            ...bill,
+            id
+          }));
+          setUtilityBills(billsArray);
+        } else {
+          setUtilityBills([]);
+        }
+      });
+
       return () => {
         unsubEvents();
         unsubMeals();
@@ -168,6 +192,7 @@ export function FamilyProvider({ children }) {
         unsubFamily();
         unsubExpenses();
         unsubCreditCards();
+        unsubUtilityBills();
       };
     } else {
       // Fallback to localStorage
@@ -177,6 +202,7 @@ export function FamilyProvider({ children }) {
       const savedFamily = localStorage.getItem('familyCalendarMembers');
       const savedExpenses = localStorage.getItem('familyCalendarExpenses');
       const savedCreditCards = localStorage.getItem('familyCalendarCreditCards');
+      const savedUtilityBills = localStorage.getItem('familyCalendarUtilityBills');
       
       if (savedEvents) setEvents(JSON.parse(savedEvents));
       if (savedMeals) setMeals(JSON.parse(savedMeals));
@@ -184,6 +210,7 @@ export function FamilyProvider({ children }) {
       if (savedFamily) setFamilyMembers(JSON.parse(savedFamily));
       if (savedExpenses) setStoreExpenses(JSON.parse(savedExpenses));
       if (savedCreditCards) setCreditCards(JSON.parse(savedCreditCards));
+      if (savedUtilityBills) setUtilityBills(JSON.parse(savedUtilityBills));
       
       setLoading(false);
     }
@@ -198,8 +225,9 @@ export function FamilyProvider({ children }) {
       localStorage.setItem('familyCalendarMembers', JSON.stringify(familyMembers));
       localStorage.setItem('familyCalendarExpenses', JSON.stringify(storeExpenses));
       localStorage.setItem('familyCalendarCreditCards', JSON.stringify(creditCards));
+      localStorage.setItem('familyCalendarUtilityBills', JSON.stringify(utilityBills));
     }
-  }, [events, meals, groceryItems, familyMembers, storeExpenses, creditCards, isFirebaseConnected, loading]);
+  }, [events, meals, groceryItems, familyMembers, storeExpenses, creditCards, utilityBills, isFirebaseConnected, loading]);
 
   // Helper function to generate recurring event dates
   const generateRecurringDates = (startDate, endDate, recurringType) => {
@@ -548,6 +576,80 @@ export function FamilyProvider({ children }) {
     return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
   };
 
+  // Utility bill functions
+  const addUtilityBill = async (bill) => {
+    // bill: { utilityId, amount, date, note?, isPaid? }
+    if (db) {
+      const billsRef = ref(db, 'utilityBills');
+      await push(billsRef, { ...bill, createdAt: Date.now() });
+    } else {
+      const newBill = { ...bill, id: Date.now().toString(), createdAt: Date.now() };
+      setUtilityBills(prev => [...prev, newBill]);
+    }
+  };
+
+  const updateUtilityBill = async (id, updates) => {
+    if (db) {
+      const billRef = ref(db, `utilityBills/${id}`);
+      await update(billRef, updates);
+    } else {
+      setUtilityBills(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b));
+    }
+  };
+
+  const removeUtilityBill = async (id) => {
+    if (db) {
+      const billRef = ref(db, `utilityBills/${id}`);
+      await remove(billRef);
+    } else {
+      setUtilityBills(prev => prev.filter(b => b.id !== id));
+    }
+  };
+
+  const getUtilityBills = (utilityId, year, month) => {
+    return utilityBills.filter(b => {
+      if (b.utilityId !== utilityId) return false;
+      // Parse date as local time to avoid timezone issues
+      const [y, m] = b.date.split('-').map(Number);
+      if (year && y !== year) return false;
+      if (month !== undefined && (m - 1) !== month) return false;
+      return true;
+    });
+  };
+
+  const getUtilityMonthlyTotal = (utilityId, year, month) => {
+    const bills = getUtilityBills(utilityId, year, month);
+    return bills.reduce((sum, b) => sum + (parseFloat(b.amount) || 0), 0);
+  };
+
+  const getUtilityAnnualTotal = (utilityId, year) => {
+    const bills = utilityBills.filter(b => {
+      if (b.utilityId !== utilityId) return false;
+      // Parse date as local time to avoid timezone issues
+      const [y] = b.date.split('-').map(Number);
+      return y === year;
+    });
+    return bills.reduce((sum, b) => sum + (parseFloat(b.amount) || 0), 0);
+  };
+
+  const getAllUtilitiesMonthlyTotal = (year, month) => {
+    const bills = utilityBills.filter(b => {
+      // Parse date as local time to avoid timezone issues
+      const [y, m] = b.date.split('-').map(Number);
+      return y === year && (m - 1) === month;
+    });
+    return bills.reduce((sum, b) => sum + (parseFloat(b.amount) || 0), 0);
+  };
+
+  const getAllUtilitiesAnnualTotal = (year) => {
+    const bills = utilityBills.filter(b => {
+      // Parse date as local time to avoid timezone issues
+      const [y] = b.date.split('-').map(Number);
+      return y === year;
+    });
+    return bills.reduce((sum, b) => sum + (parseFloat(b.amount) || 0), 0);
+  };
+
   // Credit card functions
   const addCreditCard = async (card) => {
     // card: { name, lastFourDigits, color, rewards: [{ categoryId, rewardRate }] }
@@ -689,6 +791,7 @@ export function FamilyProvider({ children }) {
       groceryItems,
       storeExpenses,
       creditCards,
+      utilityBills,
       loading,
       isFirebaseConnected,
       
@@ -697,6 +800,7 @@ export function FamilyProvider({ children }) {
       MEAL_TYPES,
       REWARD_CATEGORIES,
       STORE_CATEGORIES,
+      UTILITY_TYPES,
       
       // Event functions
       addEvent,
@@ -724,6 +828,16 @@ export function FamilyProvider({ children }) {
       getMonthlyTotal,
       getAnnualTotal,
       getAllStoresAnnualTotal,
+
+      // Utility bill functions
+      addUtilityBill,
+      updateUtilityBill,
+      removeUtilityBill,
+      getUtilityBills,
+      getUtilityMonthlyTotal,
+      getUtilityAnnualTotal,
+      getAllUtilitiesMonthlyTotal,
+      getAllUtilitiesAnnualTotal,
 
       // Credit card functions
       addCreditCard,

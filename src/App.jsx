@@ -3,6 +3,7 @@ import Calendar from './components/Calendar';
 import MealPlanner from './components/MealPlanner';
 import GroceryList from './components/GroceryList';
 import ExpenseSummary from './components/ExpenseSummary';
+import MonthlyUtilities from './components/MonthlyUtilities';
 import CreditCards from './components/CreditCards';
 import EventModal from './components/EventModal';
 import MealModal from './components/MealModal';
@@ -228,16 +229,6 @@ function App() {
               <span>Grocery List</span>
             </button>
             <button 
-              className={`nav-item ${activeView === 'creditcards' ? 'active' : ''}`}
-              onClick={() => {
-                setActiveView('creditcards');
-                if (window.innerWidth <= 768) setSidebarOpen(false);
-              }}
-            >
-              <span className="nav-icon">💳</span>
-              <span>Credit Cards</span>
-            </button>
-            <button 
               className={`nav-item ${activeView === 'expenses' ? 'active' : ''}`}
               onClick={() => {
                 setActiveView('expenses');
@@ -246,6 +237,26 @@ function App() {
             >
               <span className="nav-icon">💰</span>
               <span>Expenses</span>
+            </button>
+            <button 
+              className={`nav-item ${activeView === 'utilities' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveView('utilities');
+                if (window.innerWidth <= 768) setSidebarOpen(false);
+              }}
+            >
+              <span className="nav-icon">🏠</span>
+              <span>Utilities</span>
+            </button>
+            <button 
+              className={`nav-item ${activeView === 'creditcards' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveView('creditcards');
+                if (window.innerWidth <= 768) setSidebarOpen(false);
+              }}
+            >
+              <span className="nav-icon">💳</span>
+              <span>Credit Cards</span>
             </button>
           </nav>
 
@@ -324,6 +335,9 @@ function App() {
           )}
           {activeView === 'expenses' && (
             <ExpenseSummary />
+          )}
+          {activeView === 'utilities' && (
+            <MonthlyUtilities />
           )}
         </main>
       </div>
