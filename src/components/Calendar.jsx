@@ -34,7 +34,7 @@ const ALTERNATING_COLORS = [
 
 function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
   const calendarRef = useRef(null);
-  const { events, FAMILY_MEMBERS, MEAL_TYPES, getMeal, setMeal } = useFamily();
+  const { events, FAMILY_MEMBERS, MEAL_TYPES, getMeal, setMeal, updateEvent } = useFamily();
   const { currentUser } = useAuth();
   const [mealPopupDate, setMealPopupDate] = useState(null);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
@@ -385,6 +385,12 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
           <h4>📋 Events</h4>
           {events
             .filter(e => e.start.startsWith(selectedDate))
+            .sort((a, b) => {
+              // Sort: incomplete events first, completed events last
+              if (a.completed && !b.completed) return 1;
+              if (!a.completed && b.completed) return -1;
+              return 0;
+            })
             .map(event => {
               // Support both single memberId and multiple memberIds
               const memberIds = event.memberIds || (event.memberId ? [event.memberId] : []);
@@ -400,15 +406,27 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
                 ? new Date(event.end).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
                 : null;
               
+              const toggleComplete = async (e) => {
+                e.stopPropagation();
+                await updateEvent(event.id, { ...event, completed: !event.completed });
+              };
+
               return (
                 <div 
                   key={event.id} 
-                  className="event-item-full"
+                  className={`event-item-full ${event.completed ? 'event-completed' : ''}`}
                   onClick={() => onEventClick(event)}
                   style={{ borderLeftColor: firstMember?.color || '#4285f4' }}
                 >
                   <div className="event-header-row">
-                    <div className="event-title-large">{event.title}</div>
+                    <button 
+                      className={`complete-checkbox ${event.completed ? 'checked' : ''}`}
+                      onClick={toggleComplete}
+                      title={event.completed ? 'Mark as incomplete' : 'Mark as complete'}
+                    >
+                      {event.completed ? '✓' : ''}
+                    </button>
+                    <div className={`event-title-large ${event.completed ? 'completed-text' : ''}`}>{event.title}</div>
                     {event.recurring && event.recurring !== 'none' && (
                       <span className="recurring-badge">🔄 {event.recurring}</span>
                     )}
