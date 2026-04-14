@@ -237,6 +237,16 @@ function App() {
               <span className="nav-icon">💳</span>
               <span>Credit Cards</span>
             </button>
+            <button 
+              className={`nav-item ${activeView === 'expenses' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveView('expenses');
+                if (window.innerWidth <= 768) setSidebarOpen(false);
+              }}
+            >
+              <span className="nav-icon">💰</span>
+              <span>Expenses</span>
+            </button>
           </nav>
 
           <div className="sidebar-section">
@@ -275,6 +285,14 @@ function App() {
               }}
             >
               This Week's Meals
+            </button>
+            <button 
+              className="quick-link"
+              onClick={() => {
+                setActiveView('expenses');
+              }}
+            >
+              Expenses
             </button>
           </div>
         </aside>
