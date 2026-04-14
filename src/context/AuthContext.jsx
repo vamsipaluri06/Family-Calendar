@@ -13,10 +13,11 @@ const hashPassword = async (password) => {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
-// Default admin credentials (hashed)
+// Default admin credentials (with legacy password for backward compatibility)
 const DEFAULT_ADMIN = {
   username: 'admin',
-  passwordHash: '', // Will be set on first save
+  password: '1Admin1@3', // Legacy plain-text for first login
+  passwordHash: '', // Will be set when admin updates password
   role: 'admin'
 };
 
