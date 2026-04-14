@@ -1,8 +1,17 @@
 // App version and changelog
-export const APP_VERSION = '2.0.0';
+export const APP_VERSION = '2.1.0';
 export const BUILD_DATE = '2026-04-14';
 
 export const CHANGELOG = [
+  {
+    version: '2.1.0',
+    date: '2026-04-14',
+    changes: [
+      '📱 PWA Support - Install as app on iPhone/Android!',
+      '🔄 Offline caching with service worker',
+      '🎨 Custom app icon for home screen'
+    ]
+  },
   {
     version: '2.0.0',
     date: '2026-04-14',
