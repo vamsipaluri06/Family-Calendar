@@ -5398,6 +5398,86 @@
   color: white;
 }
 
+.footer-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.install-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.install-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.install-btn:active {
+  transform: translateY(0);
+}
+
+.installed-badge {
+  background: rgba(76, 175, 80, 0.3);
+  border: 1px solid rgba(76, 175, 80, 0.5);
+  color: #a5d6a7;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Install Instructions */
+.install-instructions {
+  text-align: left;
+}
+
+.install-steps h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+}
+
+.install-steps ol {
+  padding-left: 24px;
+  margin: 0 0 16px 0;
+}
+
+.install-steps li {
+  margin-bottom: 12px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.install-steps .icon-hint {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.install-note {
+  background: #e8f5e9;
+  padding: 12px;
+  border-radius: 8px;
+  color: #2e7d32;
+  font-size: 14px;
+  margin: 0;
+}
+
 .changelog-overlay {
   position: fixed;
   top: 0;

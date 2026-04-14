@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useFamily } from '../context/FamilyContext';
 import { APP_VERSION, CHANGELOG } from '../version';
@@ -13,6 +13,57 @@ function LoginPage() {
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [showChangelog, setShowChangelog] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [showInstallInstructions, setShowInstallInstructions] = useState(false);
+  
+  // Detect iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isAndroid = /Android/.test(navigator.userAgent);
+
+  // Check if app is already installed
+  useEffect(() => {
+    // Check if running as standalone (installed PWA)
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
+    
+    // Listen for the beforeinstallprompt event
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+    
+    // Listen for app installed event
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setIsInstallable(false);
+      setDeferredPrompt(null);
+    };
+    
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      setIsInstalled(true);
+    }
+    setDeferredPrompt(null);
+    setIsInstallable(false);
+  };
 
   // Get members that have passwords set
   const membersWithAccess = FAMILY_MEMBERS.filter(member => users[member.id]);
@@ -192,12 +243,31 @@ function LoginPage() {
 
         <div className="login-footer">
           <p>🔒 Your family's private calendar</p>
-          <button 
-            className="version-btn"
-            onClick={() => setShowChangelog(!showChangelog)}
-          >
-            v{APP_VERSION}
-          </button>
+          <div className="footer-buttons">
+            {!isInstalled && (
+              isInstallable ? (
+                <button 
+                  className="install-btn"
+                  onClick={handleInstallClick}
+                >
+                  📲 Install App
+                </button>
+              ) : (
+                <button 
+                  className="install-btn"
+                  onClick={() => setShowInstallInstructions(true)}
+                >
+                  📲 Install App
+                </button>
+              )
+            )}
+            <button 
+              className="version-btn"
+              onClick={() => setShowChangelog(!showChangelog)}
+            >
+              v{APP_VERSION}
+            </button>
+          </div>
         </div>
         
         {!showAdminLogin && !selectedMember && (
@@ -209,6 +279,50 @@ function LoginPage() {
           </button>
         )}
       </div>
+
+      {/* Install Instructions Modal */}
+      {showInstallInstructions && (
+        <div className="changelog-overlay" onClick={() => setShowInstallInstructions(false)}>
+          <div className="changelog-modal" onClick={e => e.stopPropagation()}>
+            <div className="changelog-header">
+              <h2>📲 Install App</h2>
+              <button className="modal-close" onClick={() => setShowInstallInstructions(false)}>×</button>
+            </div>
+            <div className="changelog-content install-instructions">
+              {isIOS ? (
+                <div className="install-steps">
+                  <h3>📱 Install on iPhone/iPad</h3>
+                  <ol>
+                    <li>Tap the <strong>Share</strong> button <span className="icon-hint">⬆️</span> at the bottom of Safari</li>
+                    <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                    <li>Tap <strong>"Add"</strong> in the top right</li>
+                  </ol>
+                  <p className="install-note">The app will appear on your home screen like a regular app!</p>
+                </div>
+              ) : isAndroid ? (
+                <div className="install-steps">
+                  <h3>📱 Install on Android</h3>
+                  <ol>
+                    <li>Tap the <strong>menu</strong> button <span className="icon-hint">⋮</span> in Chrome</li>
+                    <li>Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong></li>
+                    <li>Tap <strong>"Install"</strong> to confirm</li>
+                  </ol>
+                  <p className="install-note">The app will appear on your home screen!</p>
+                </div>
+              ) : (
+                <div className="install-steps">
+                  <h3>💻 Install on Desktop</h3>
+                  <ol>
+                    <li>Look for the <strong>install icon</strong> <span className="icon-hint">⊕</span> in your browser's address bar</li>
+                    <li>Click it and select <strong>"Install"</strong></li>
+                  </ol>
+                  <p className="install-note">Or use your browser's menu → "Install Family Calendar"</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Changelog Modal */}
       {showChangelog && (
