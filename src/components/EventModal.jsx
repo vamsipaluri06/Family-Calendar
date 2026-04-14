@@ -44,7 +44,8 @@ function EventModal({ event, selectedDate, onClose }) {
     memberIds: [FAMILY_MEMBERS[0].id], // Array for multiple family members
     recurring: 'none', // 'none', 'daily', 'weekly', 'monthly', 'annually'
     recurringEndDate: getDefaultRecurringEndDate(), // End date for recurring events
-    reminder: '30' // minutes before
+    reminder: '30', // minutes before
+    completed: false
   });
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -80,7 +81,8 @@ function EventModal({ event, selectedDate, onClose }) {
         memberIds: memberIds,
         recurring: event.recurring || 'none',
         recurringEndDate: event.recurringEndDate || getDefaultRecurringEndDate(),
-        reminder: event.reminder || '30'
+        reminder: event.reminder || '30',
+        completed: event.completed || false
       });
     }
   }, [event, FAMILY_MEMBERS]);
@@ -107,7 +109,8 @@ function EventModal({ event, selectedDate, onClose }) {
       memberId: formData.memberIds[0], // Keep first one for backward compatibility
       recurring: formData.recurring,
       recurringEndDate: formData.recurring !== 'none' ? formData.recurringEndDate : null,
-      reminder: formData.reminder
+      reminder: formData.reminder,
+      completed: formData.completed
     };
 
     try {
@@ -364,6 +367,20 @@ function EventModal({ event, selectedDate, onClose }) {
               rows={3}
             />
           </div>
+
+          {event && (
+            <div className="form-row">
+              <label className="checkbox-wrapper completed-checkbox">
+                <input
+                  type="checkbox"
+                  name="completed"
+                  checked={formData.completed}
+                  onChange={handleChange}
+                />
+                <span>✓ Mark as completed</span>
+              </label>
+            </div>
+          )}
 
           <div className="modal-actions">
             {event && (

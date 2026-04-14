@@ -145,11 +145,13 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
         allDay: event.allDay,
         backgroundColor,
         borderColor,
+        classNames: event.completed ? ['event-completed'] : [],
         extendedProps: {
           description: event.description,
           memberIds: memberIds,
           memberNames: memberNames,
-          type: 'event'
+          type: 'event',
+          completed: event.completed
         }
       };
     });
