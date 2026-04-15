@@ -2,12 +2,13 @@
 
 A beautiful, feature-rich family calendar application with meal planning, grocery lists, expense tracking, and member authentication. Built with React and designed with a stunning rainbow gradient theme.
 
-**Current Version: 2.2.0** | [View Changelog](#-changelog)
+**Current Version: 2.3.0** | [View Changelog](#-changelog)
 
 ## ✨ Features
 
 ### Core Features
 - 📅 **Calendar Views** - Day, Week, Month views powered by FullCalendar
+- ⬅️➡️ **Inline Navigation** - Clean "< April >" style month navigation (v2.3.0)
 - ✅ **Event Completion** - Mark events as done with checkbox & strikethrough
 - 🍽️ **Meal Planner** - Plan Breakfast, Lunch, Snack & Dinner for each day
 - 🛒 **Grocery List** - Auto-generate shopping lists from meal ingredients
@@ -26,8 +27,9 @@ A beautiful, feature-rich family calendar application with meal planning, grocer
 - 💳 **Credit Cards** - Track rewards and payment due dates
 - 🏠 **Monthly Utilities** - Track Rent, Electricity, Internet, Mobile bills
 - 💵 **Expense Tracking** - Log expenses by store with full history
-- 📊 **Monthly Details** - Click month total to see all expenses
-- 📈 **Yearly Breakdown** - Click year total to see monthly totals
+- 📊 **Expense Pie Chart** - Visual donut chart with store breakdown (v2.3.0)
+- 📈 **Monthly Details** - Click month total to see all expenses
+- 📉 **Yearly Breakdown** - Click year total to see monthly totals
 
 ### Authentication & Security
 - 🔐 **User Login** - PIN-based authentication for each family member
@@ -212,7 +214,15 @@ const FAMILY_MEMBERS = [
 - **[README.md](README.md)** - This file (quick start & features)
 - **[TECHNICAL.md](TECHNICAL.md)** - Detailed technical architecture & implementation
 
-## � Changelog
+## 📝 Changelog
+
+### v2.3.0 (April 15, 2026)
+- 📊 **Expense Pie Chart** - Visual donut chart showing spending breakdown by store
+- 📅 **Calendar Navigation** - Inline "< April >" style with arrows side by side
+- 🎯 **Today Button** - Centered below month navigation for quick access
+- 🎨 **Chart Legend** - Store names with color indicators below pie chart
+- 📱 **Mobile Calendar** - Improved horizontal toolbar layout
+
 ### v2.2.0 (April 14, 2026)
 - 🌙 Dark Theme - Toggle between light and dark mode
 - ✅ Event Completion - Mark events done with checkbox & strikethrough

@@ -1,8 +1,19 @@
 // App version and changelog
-export const APP_VERSION = '2.2.0';
-export const BUILD_DATE = '2026-04-14';
+export const APP_VERSION = '2.3.0';
+export const BUILD_DATE = '2026-04-15';
 
 export const CHANGELOG = [
+  {
+    version: '2.3.0',
+    date: '2026-04-15',
+    changes: [
+      '📊 Expense Pie Chart - Visual spending breakdown by store',
+      '📅 Calendar Navigation - Inline "< April >" style arrows',
+      '🎯 Today Button - Centered below month navigation',
+      '🎨 Improved chart styling with legend and centered total',
+      '📱 Better mobile calendar toolbar layout'
+    ]
+  },
   {
     version: '2.2.0',
     date: '2026-04-14',

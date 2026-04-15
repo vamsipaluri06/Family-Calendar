@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useFamily } from '../context/FamilyContext';
 import ExpenseModal from './ExpenseModal';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 // Base URL for Vite public assets
 const BASE_URL = import.meta.env.BASE_URL || '/';
@@ -31,6 +32,7 @@ function ExpenseSummary() {
   const [viewYear, setViewYear] = useState(new Date().getFullYear());
   const [showMonthDetails, setShowMonthDetails] = useState(false);
   const [showYearDetails, setShowYearDetails] = useState(false);
+  const [showStoreList, setShowStoreList] = useState(false);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -144,34 +146,127 @@ function ExpenseSummary() {
         </div>
       </div>
 
-      {/* Store Breakdown */}
-      <div className="store-expense-list">
-        <h3>By Store</h3>
-        {storeStats.map(store => (
+      {/* Store Breakdown - Pie Chart */}
+      <div className="store-expense-chart">
+        {storeStats.filter(s => s.monthlyTotal > 0).length === 0 ? (
+          <p className="no-expenses" style={{ textAlign: 'center', padding: '2rem' }}>No expenses recorded for {months[viewMonth]}</p>
+        ) : (
           <div 
-            key={store.id} 
-            className="store-expense-row"
-            onClick={() => setSelectedStore(store)}
+            className="pie-chart-container" 
+            onClick={() => setShowStoreList(true)}
+            style={{ cursor: 'pointer', position: 'relative' }}
           >
-            <div className="store-info">
-              {store.logo ? (
-                <img src={store.logo} alt={store.name} className="store-logo-tiny" />
-              ) : (
-                <span className="store-emoji-tiny">{store.emoji}</span>
-              )}
-              <span className="store-name">{store.name}</span>
-            </div>
-            <div className="store-amounts">
-              <span className="monthly-amount" style={{ color: store.color }}>
-                {formatCurrency(store.monthlyTotal)}
-              </span>
-              <span className="annual-amount">
-                {formatCurrency(store.annualTotal)} ytd
-              </span>
+            <ResponsiveContainer width="100%" height={350}>
+              <PieChart>
+                <Pie
+                  data={storeStats.filter(s => s.monthlyTotal > 0).map(store => ({
+                    name: store.name,
+                    value: store.monthlyTotal,
+                    color: store.color,
+                    id: store.id
+                  }))}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={65}
+                  outerRadius={105}
+                  paddingAngle={2}
+                  dataKey="value"
+                  stroke="rgba(255,255,255,0.8)"
+                  strokeWidth={2}
+                >
+                  {storeStats.filter(s => s.monthlyTotal > 0).map((store, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={store.color}
+                      style={{ filter: 'drop-shadow(0px 3px 6px rgba(0,0,0,0.25))' }}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  formatter={(value) => [formatCurrency(value), 'Spent']}
+                  contentStyle={{ 
+                    backgroundColor: 'var(--bg-primary, #fff)', 
+                    border: '1px solid var(--border-color, #e5e7eb)',
+                    borderRadius: '12px',
+                    color: 'var(--text-primary, #333)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                    padding: '12px 16px'
+                  }}
+                  labelStyle={{ fontWeight: '600', marginBottom: '4px' }}
+                />
+                <Legend 
+                  layout="horizontal"
+                  verticalAlign="bottom"
+                  align="center"
+                  wrapperStyle={{
+                    paddingTop: '10px'
+                  }}
+                  formatter={(value, entry) => (
+                    <span style={{ 
+                      color: 'var(--text-primary, #333)', 
+                      fontWeight: '500',
+                      fontSize: '13px'
+                    }}>
+                      {value}
+                    </span>
+                  )}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            {/* Center Total - HTML Overlay */}
+            <div className="pie-center-label">
+              <span className="pie-center-amount">{formatCurrency(totalMonthly)}</span>
             </div>
           </div>
-        ))}
+        )}
       </div>
+
+      {/* Store List Modal */}
+      {showStoreList && (
+        <div className="modal-overlay" onClick={() => setShowStoreList(false)}>
+          <div className="expense-modal month-detail-modal" onClick={e => e.stopPropagation()}>
+            <div className="expense-modal-header">
+              <h2>🏪 Store Breakdown - {months[viewMonth]} {viewYear}</h2>
+              <button className="modal-close" onClick={() => setShowStoreList(false)}>×</button>
+            </div>
+            
+            <div className="month-expense-summary">
+              <span className="expense-count">{storeStats.filter(s => s.monthlyTotal > 0).length} store{storeStats.filter(s => s.monthlyTotal > 0).length !== 1 ? 's' : ''}</span>
+              <span className="expense-total">{formatCurrency(totalMonthly)}</span>
+            </div>
+
+            <div className="store-expense-list">
+              {storeStats.map(store => (
+                <div 
+                  key={store.id} 
+                  className="store-expense-row"
+                  onClick={() => {
+                    setSelectedStore(store);
+                    setShowStoreList(false);
+                  }}
+                >
+                  <div className="store-info">
+                    {store.logo ? (
+                      <img src={store.logo} alt={store.name} className="store-logo-tiny" />
+                    ) : (
+                      <span className="store-emoji-tiny">{store.emoji}</span>
+                    )}
+                    <span className="store-name">{store.name}</span>
+                  </div>
+                  <div className="store-amounts">
+                    <span className="monthly-amount" style={{ color: store.color }}>
+                      {formatCurrency(store.monthlyTotal)}
+                    </span>
+                    <span className="annual-amount">
+                      {formatCurrency(store.annualTotal)} ytd
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Store Expense Modal */}
       {selectedStore && (

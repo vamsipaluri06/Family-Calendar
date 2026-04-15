@@ -281,9 +281,12 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           headerToolbar={{
-            left: 'prev,next today',
+            left: 'prev',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            right: 'next'
+          }}
+          footerToolbar={{
+            center: 'dayGridMonth,timeGridWeek,timeGridDay'
           }}
           events={calendarEvents}
           dateClick={handleDateClick}
@@ -303,6 +306,20 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
             meridiem: 'short'
           }}
         />
+
+        {/* Today button centered below month navigation */}
+        <div className="calendar-today-row">
+          <button 
+            className="calendar-today-btn"
+            onClick={() => {
+              if (calendarRef.current) {
+                calendarRef.current.getApi().today();
+              }
+            }}
+          >
+            Today
+          </button>
+        </div>
 
         {/* Meal Popup - appears when food bowl icon is clicked */}
         {mealPopupDate && (
