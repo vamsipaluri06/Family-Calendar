@@ -494,12 +494,27 @@ body {
 
 /* Calendar Container */
 .calendar-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(135deg, 
+    rgba(218, 186, 255, 0.15) 0%,
+    rgba(255, 186, 255, 0.12) 20%,
+    rgba(255, 182, 193, 0.12) 40%,
+    rgba(255, 218, 185, 0.12) 60%,
+    rgba(255, 255, 186, 0.12) 80%,
+    rgba(186, 255, 201, 0.15) 100%
+  );
+  background-size: 300% 300%;
+  animation: rainbowBg 20s ease infinite;
   backdrop-filter: blur(10px);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
   padding: 24px;
   border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+@keyframes rainbowBg {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .calendar-header {

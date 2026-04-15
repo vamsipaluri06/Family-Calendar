@@ -1,11 +1,27 @@
 /* Meal Planner Styles */
 .meal-planner {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(135deg, 
+    rgba(255, 182, 193, 0.15) 0%,
+    rgba(255, 218, 185, 0.12) 16%,
+    rgba(255, 255, 186, 0.12) 33%,
+    rgba(186, 255, 201, 0.12) 50%,
+    rgba(186, 225, 255, 0.15) 66%,
+    rgba(218, 186, 255, 0.12) 83%,
+    rgba(255, 186, 255, 0.15) 100%
+  );
+  background-size: 300% 300%;
+  animation: rainbowBg 15s ease infinite;
   backdrop-filter: blur(10px);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
   padding: 24px;
   border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+@keyframes rainbowBg {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .meal-planner-header {
@@ -335,7 +351,15 @@
 
 /* Grocery List Styles */
 .grocery-list {
-  background: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(135deg, 
+    rgba(186, 255, 201, 0.15) 0%,
+    rgba(186, 225, 255, 0.12) 25%,
+    rgba(218, 186, 255, 0.12) 50%,
+    rgba(255, 186, 255, 0.12) 75%,
+    rgba(255, 182, 193, 0.15) 100%
+  );
+  background-size: 300% 300%;
+  animation: rainbowBg 18s ease infinite;
   backdrop-filter: blur(10px);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
@@ -1346,6 +1370,17 @@
   padding: 24px;
   max-width: 800px;
   margin: 0 auto;
+  background: linear-gradient(135deg, 
+    rgba(255, 218, 185, 0.15) 0%,
+    rgba(255, 255, 186, 0.12) 25%,
+    rgba(186, 255, 201, 0.12) 50%,
+    rgba(186, 225, 255, 0.15) 75%,
+    rgba(218, 186, 255, 0.12) 100%
+  );
+  background-size: 300% 300%;
+  animation: rainbowBg 16s ease infinite;
+  border-radius: 16px;
+  min-height: calc(100vh - var(--header-height) - 48px);
 }
 
 .expense-summary-header {
@@ -3418,6 +3453,17 @@
   padding: 24px;
   max-width: 900px;
   margin: 0 auto;
+  background: linear-gradient(135deg, 
+    rgba(255, 182, 193, 0.15) 0%,
+    rgba(186, 255, 201, 0.12) 25%,
+    rgba(186, 225, 255, 0.12) 50%,
+    rgba(218, 186, 255, 0.15) 75%,
+    rgba(255, 218, 185, 0.12) 100%
+  );
+  background-size: 300% 300%;
+  animation: rainbowBg 18s ease infinite;
+  border-radius: 16px;
+  min-height: calc(100vh - var(--header-height) - 48px);
 }
 
 .credit-cards-header {
@@ -5179,6 +5225,17 @@
   padding: 24px;
   max-width: 800px;
   margin: 0 auto;
+  background: linear-gradient(135deg, 
+    rgba(186, 225, 255, 0.15) 0%,
+    rgba(218, 186, 255, 0.12) 25%,
+    rgba(255, 182, 193, 0.12) 50%,
+    rgba(255, 218, 185, 0.15) 75%,
+    rgba(186, 255, 201, 0.12) 100%
+  );
+  background-size: 300% 300%;
+  animation: rainbowBg 17s ease infinite;
+  border-radius: 16px;
+  min-height: calc(100vh - var(--header-height) - 48px);
 }
 
 .utilities-header {
