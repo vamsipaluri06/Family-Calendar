@@ -5978,3 +5978,149 @@
 :root.dark-theme .nav-arrow:hover {
   background: var(--bg-hover);
 }
+
+/* Utilities Dark Theme */
+:root.dark-theme .monthly-utilities {
+  background: transparent;
+}
+
+:root.dark-theme .utility-list {
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .utility-list h3 {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .utility-row {
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .utility-row:hover {
+  background: var(--bg-hover);
+}
+
+:root.dark-theme .utility-name {
+  color: var(--text-primary);
+}
+
+:root.dark-theme .utility-amounts .annual-amount {
+  color: var(--text-secondary);
+}
+
+/* Credit Cards Dark Theme */
+:root.dark-theme .credit-cards-page {
+  background: transparent;
+}
+
+:root.dark-theme .credit-cards-tabs {
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .tab-btn {
+  color: var(--text-secondary);
+}
+
+:root.dark-theme .tab-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+:root.dark-theme .store-recommendation-card {
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .store-recommendation-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+:root.dark-theme .store-header {
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .store-name-small {
+  color: var(--text-primary);
+}
+
+:root.dark-theme .recommended-card {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .reward-label {
+  color: var(--text-secondary);
+}
+
+:root.dark-theme .no-cards-message {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+:root.dark-theme .add-card-link {
+  border-color: var(--border-color);
+  color: var(--primary);
+}
+
+:root.dark-theme .add-card-link:hover {
+  border-color: var(--primary);
+  background: rgba(66, 133, 244, 0.1);
+}
+
+:root.dark-theme .credit-card-display {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+:root.dark-theme .card-form {
+  background: var(--bg-primary);
+}
+
+:root.dark-theme .card-form input,
+:root.dark-theme .card-form select {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+:root.dark-theme .payment-info {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .my-cards-section {
+  background: transparent;
+}
+
+:root.dark-theme .my-card-item {
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .my-card-item:hover {
+  background: var(--bg-hover);
+}
+
+:root.dark-theme .card-details-row {
+  color: var(--text-secondary);
+}
+
+/* Utility Modal Dark Theme */
+:root.dark-theme .utility-modal {
+  background: var(--bg-primary);
+}
+
+:root.dark-theme .utility-history {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .history-item {
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .history-item:hover {
+  background: var(--bg-hover);
+}
