@@ -1,8 +1,19 @@
 // App version and changelog
-export const APP_VERSION = '2.1.0';
+export const APP_VERSION = '2.2.0';
 export const BUILD_DATE = '2026-04-14';
 
 export const CHANGELOG = [
+  {
+    version: '2.2.0',
+    date: '2026-04-14',
+    changes: [
+      '🌙 Dark Theme - Toggle between light and dark mode',
+      '✅ Event Completion - Mark events done with checkbox',
+      '📊 Monthly Expense Details - Click to view all expenses',
+      '📈 Yearly Expense Breakdown - View monthly totals',
+      '📱 Improved mobile navigation'
+    ]
+  },
   {
     version: '2.1.0',
     date: '2026-04-14',

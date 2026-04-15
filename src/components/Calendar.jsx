@@ -38,6 +38,23 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
   const { currentUser } = useAuth();
   const [mealPopupDate, setMealPopupDate] = useState(null);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+  const [isDarkMode, setIsDarkMode] = useState(() => 
+    document.documentElement.classList.contains('dark-theme')
+  );
+
+  // Listen for theme changes
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          setIsDarkMode(document.documentElement.classList.contains('dark-theme'));
+        }
+      });
+    });
+    
+    observer.observe(document.documentElement, { attributes: true });
+    return () => observer.disconnect();
+  }, []);
 
   // Handle vote for logged-in user
   const handleVote = async (mealType, voteType) => {
@@ -198,7 +215,9 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
   const handleDayCellDidMount = (arg) => {
     // Add rainbow gradient based on day of week
     const dayOfWeek = arg.date.getDay();
-    const rainbowColors = [
+    
+    // Light mode rainbow colors
+    const lightColors = [
       'rgba(255, 182, 193, 0.15)', // Sunday - pink
       'rgba(255, 218, 185, 0.15)', // Monday - peach
       'rgba(255, 255, 186, 0.15)', // Tuesday - yellow
@@ -207,7 +226,20 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
       'rgba(218, 186, 255, 0.15)', // Friday - purple
       'rgba(255, 186, 255, 0.15)', // Saturday - magenta
     ];
-    arg.el.style.backgroundColor = rainbowColors[dayOfWeek];
+    
+    // Dark mode subtle colors
+    const darkColors = [
+      'rgba(255, 182, 193, 0.08)', // Sunday - pink
+      'rgba(255, 218, 185, 0.08)', // Monday - peach
+      'rgba(255, 255, 186, 0.08)', // Tuesday - yellow
+      'rgba(186, 255, 201, 0.08)', // Wednesday - green
+      'rgba(186, 225, 255, 0.08)', // Thursday - blue
+      'rgba(218, 186, 255, 0.08)', // Friday - purple
+      'rgba(255, 186, 255, 0.08)', // Saturday - magenta
+    ];
+    
+    const colors = isDarkMode ? darkColors : lightColors;
+    arg.el.style.backgroundColor = colors[dayOfWeek];
   };
 
   // Custom day cell content with food bowl icon
@@ -244,6 +276,7 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
       
       <div className="calendar-wrapper">
         <FullCalendar
+          key={`calendar-${isDarkMode ? 'dark' : 'light'}`}
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"

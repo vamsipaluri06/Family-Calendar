@@ -31,6 +31,17 @@ function App() {
   const [editingMeal, setEditingMeal] = useState(null);
   // Start with sidebar closed on mobile (width <= 768px)
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
+  // Dark theme state
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('familyCalendarDarkMode');
+    return saved === 'true';
+  });
+
+  // Apply dark mode class to document
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark-theme', darkMode);
+    localStorage.setItem('familyCalendarDarkMode', darkMode);
+  }, [darkMode]);
 
   // Live clock state
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -154,6 +165,13 @@ function App() {
         </div>
         
         <div className="header-right">
+          <button
+            className="theme-toggle-btn"
+            onClick={() => setDarkMode(!darkMode)}
+            title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
           <div className={`sync-status ${isFirebaseConnected ? 'connected' : 'local'}`}>
             {isFirebaseConnected ? '🔄 Synced' : '💾 Local'}
           </div>
@@ -363,7 +381,10 @@ function App() {
       <nav className="mobile-bottom-nav">
         <button 
           className={`mobile-nav-btn ${activeView === 'calendar' ? 'active' : ''}`}
-          onClick={() => setActiveView('calendar')}
+          onClick={() => {
+            setSidebarOpen(false);
+            setActiveView('calendar');
+          }}
         >
           <span className="mobile-nav-icon">📅</span>
           <span className="mobile-nav-label">Calendar</span>
@@ -371,6 +392,7 @@ function App() {
         <button 
           className={`mobile-nav-btn ${activeView === 'meals' ? 'active' : ''}`}
           onClick={() => {
+            setSidebarOpen(false);
             setMealViewMode('today');
             setActiveView('meals');
           }}
@@ -380,21 +402,30 @@ function App() {
         </button>
         <button 
           className="mobile-nav-btn add-btn"
-          onClick={handleAddEvent}
+          onClick={() => {
+            setSidebarOpen(false);
+            handleAddEvent();
+          }}
         >
           <span className="mobile-nav-icon">➕</span>
           <span className="mobile-nav-label">Add</span>
         </button>
         <button 
           className={`mobile-nav-btn ${activeView === 'grocery' ? 'active' : ''}`}
-          onClick={() => setActiveView('grocery')}
+          onClick={() => {
+            setSidebarOpen(false);
+            setActiveView('grocery');
+          }}
         >
           <span className="mobile-nav-icon">🛒</span>
           <span className="mobile-nav-label">Grocery</span>
         </button>
         <button 
           className={`mobile-nav-btn ${activeView === 'expenses' ? 'active' : ''}`}
-          onClick={() => setActiveView('expenses')}
+          onClick={() => {
+            setSidebarOpen(false);
+            setActiveView('expenses');
+          }}
         >
           <span className="mobile-nav-icon">💰</span>
           <span className="mobile-nav-label">Expenses</span>

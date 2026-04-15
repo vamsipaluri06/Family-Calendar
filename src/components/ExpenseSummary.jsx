@@ -29,6 +29,8 @@ function ExpenseSummary() {
   const [selectedStore, setSelectedStore] = useState(null);
   const [viewMonth, setViewMonth] = useState(new Date().getMonth());
   const [viewYear, setViewYear] = useState(new Date().getFullYear());
+  const [showMonthDetails, setShowMonthDetails] = useState(false);
+  const [showYearDetails, setShowYearDetails] = useState(false);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -53,8 +55,35 @@ function ExpenseSummary() {
     })).sort((a, b) => b.monthlyTotal - a.monthlyTotal);
   }, [storeExpenses, viewYear, viewMonth]);
 
+  // Get all expenses for the selected month
+  const monthlyExpenses = useMemo(() => {
+    return storeExpenses
+      .filter(e => {
+        const expenseDate = new Date(e.date);
+        return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === viewMonth;
+      })
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [storeExpenses, viewYear, viewMonth]);
+
   const totalMonthly = storeStats.reduce((sum, s) => sum + s.monthlyTotal, 0);
   const totalAnnual = getAllStoresAnnualTotal(viewYear);
+
+  // Get totals for each month of the year
+  const yearlyMonthlyTotals = useMemo(() => {
+    return months.map((monthName, monthIndex) => {
+      const monthExpenses = storeExpenses.filter(e => {
+        const expenseDate = new Date(e.date);
+        return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === monthIndex;
+      });
+      const total = monthExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+      return {
+        month: monthName,
+        monthIndex,
+        total,
+        expenseCount: monthExpenses.length
+      };
+    });
+  }, [storeExpenses, viewYear]);
 
   return (
     <div className="expense-summary">
@@ -95,13 +124,23 @@ function ExpenseSummary() {
 
       {/* Overall Summary Cards */}
       <div className="expense-totals">
-        <div className="total-card monthly">
+        <div 
+          className="total-card monthly clickable"
+          onClick={() => setShowMonthDetails(true)}
+          title="Click to view all expenses"
+        >
           <span className="total-label">{months[viewMonth]} Total</span>
           <span className="total-value">{formatCurrency(totalMonthly)}</span>
+          <span className="click-hint">Click to view details</span>
         </div>
-        <div className="total-card annual">
+        <div 
+          className="total-card annual clickable"
+          onClick={() => setShowYearDetails(true)}
+          title="Click to view monthly breakdown"
+        >
           <span className="total-label">{viewYear} Year Total</span>
           <span className="total-value">{formatCurrency(totalAnnual)}</span>
+          <span className="click-hint">Click to view details</span>
         </div>
       </div>
 
@@ -140,6 +179,105 @@ function ExpenseSummary() {
           store={selectedStore}
           onClose={() => setSelectedStore(null)}
         />
+      )}
+
+      {/* Monthly Expenses Detail Modal */}
+      {showMonthDetails && (
+        <div className="modal-overlay" onClick={() => setShowMonthDetails(false)}>
+          <div className="expense-modal month-detail-modal" onClick={e => e.stopPropagation()}>
+            <div className="expense-modal-header">
+              <h2>📋 {months[viewMonth]} {viewYear} Expenses</h2>
+              <button className="modal-close" onClick={() => setShowMonthDetails(false)}>×</button>
+            </div>
+            
+            <div className="month-expense-summary">
+              <span className="expense-count">{monthlyExpenses.length} expense{monthlyExpenses.length !== 1 ? 's' : ''}</span>
+              <span className="expense-total">{formatCurrency(totalMonthly)}</span>
+            </div>
+
+            <div className="month-expense-list">
+              {monthlyExpenses.length === 0 ? (
+                <p className="no-expenses">No expenses recorded for {months[viewMonth]}</p>
+              ) : (
+                monthlyExpenses.map(expense => {
+                  const store = GROCERY_STORES.find(s => s.id === expense.storeId);
+                  const expenseDate = new Date(expense.date);
+                  return (
+                    <div key={expense.id} className="month-expense-item">
+                      <div className="expense-date">
+                        {expenseDate.toLocaleDateString('en-US', { 
+                          weekday: 'short',
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </div>
+                      <div className="expense-store-info">
+                        {store?.logo ? (
+                          <img src={store.logo} alt={store?.name} className="store-logo-tiny" />
+                        ) : (
+                          <span className="store-emoji-tiny">{store?.emoji || '📦'}</span>
+                        )}
+                        <span className="expense-store-name">{store?.name || 'Unknown'}</span>
+                      </div>
+                      {expense.note && (
+                        <div className="expense-note">{expense.note}</div>
+                      )}
+                      <div className="expense-amount" style={{ color: store?.color || '#333' }}>
+                        {formatCurrency(expense.amount)}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Year Details Modal - Monthly Breakdown */}
+      {showYearDetails && (
+        <div className="modal-overlay" onClick={() => setShowYearDetails(false)}>
+          <div className="expense-modal month-detail-modal" onClick={e => e.stopPropagation()}>
+            <div className="expense-modal-header">
+              <h2>📊 {viewYear} Monthly Breakdown</h2>
+              <button className="modal-close" onClick={() => setShowYearDetails(false)}>×</button>
+            </div>
+            
+            <div className="month-expense-summary">
+              <span className="expense-count">{yearlyMonthlyTotals.filter(m => m.total > 0).length} month{yearlyMonthlyTotals.filter(m => m.total > 0).length !== 1 ? 's' : ''} with expenses</span>
+              <span className="expense-total">{formatCurrency(totalAnnual)}</span>
+            </div>
+
+            <div className="month-expense-list year-breakdown">
+              {yearlyMonthlyTotals.filter(m => m.total > 0).length === 0 ? (
+                <p className="no-expenses">No expenses recorded for {viewYear}</p>
+              ) : (
+                yearlyMonthlyTotals
+                  .filter(monthData => monthData.total > 0)
+                  .map((monthData) => (
+                    <div 
+                      key={monthData.monthIndex} 
+                      className="year-month-item has-expenses"
+                      onClick={() => {
+                        setViewMonth(monthData.monthIndex);
+                        setShowYearDetails(false);
+                        setShowMonthDetails(true);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="year-month-name">{monthData.month}</div>
+                      <div className="year-month-stats">
+                        <span className="year-month-count">{monthData.expenseCount} expense{monthData.expenseCount !== 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="year-month-total has-amount">
+                        {formatCurrency(monthData.total)}
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

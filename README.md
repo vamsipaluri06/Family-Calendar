@@ -2,17 +2,19 @@
 
 A beautiful, feature-rich family calendar application with meal planning, grocery lists, expense tracking, and member authentication. Built with React and designed with a stunning rainbow gradient theme.
 
-**Current Version: 2.1.0** | [View Changelog](#-changelog)
+**Current Version: 2.2.0** | [View Changelog](#-changelog)
 
 ## ✨ Features
 
 ### Core Features
 - 📅 **Calendar Views** - Day, Week, Month views powered by FullCalendar
+- ✅ **Event Completion** - Mark events as done with checkbox & strikethrough
 - 🍽️ **Meal Planner** - Plan Breakfast, Lunch, Snack & Dinner for each day
 - 🛒 **Grocery List** - Auto-generate shopping lists from meal ingredients
 - 👪 **Family Members** - Color-coded events and activities for 3 family members
 - 🔄 **Sync Across Devices** - Real-time sync with Firebase Realtime Database
 - 📱 **Mobile-First Design** - Fully responsive with bottom navigation for phones
+- 🌙 **Dark Theme** - Toggle between light and dark mode
 
 ### 📱 PWA Support (New in v2.1.0)
 - 📲 **Install as App** - Add to home screen on iPhone, Android, or desktop
@@ -24,6 +26,8 @@ A beautiful, feature-rich family calendar application with meal planning, grocer
 - 💳 **Credit Cards** - Track rewards and payment due dates
 - 🏠 **Monthly Utilities** - Track Rent, Electricity, Internet, Mobile bills
 - 💵 **Expense Tracking** - Log expenses by store with full history
+- 📊 **Monthly Details** - Click month total to see all expenses
+- 📈 **Yearly Breakdown** - Click year total to see monthly totals
 
 ### Authentication & Security
 - 🔐 **User Login** - PIN-based authentication for each family member
@@ -209,7 +213,13 @@ const FAMILY_MEMBERS = [
 - **[TECHNICAL.md](TECHNICAL.md)** - Detailed technical architecture & implementation
 
 ## � Changelog
-
+### v2.2.0 (April 14, 2026)
+- 🌙 Dark Theme - Toggle between light and dark mode
+- ✅ Event Completion - Mark events done with checkbox & strikethrough
+- 📊 Monthly Expense Details - Click month total to view all expenses
+- 📈 Yearly Expense Breakdown - Click year total to see monthly totals
+- 📱 Improved mobile navigation - Sidebar closes on nav tap
+- 🎨 Dark theme support for calendar, meals, and all screens
 ### v2.1.0 (April 14, 2026)
 - 📱 PWA Support - Install as app on iPhone/Android/Desktop
 - 🔄 Offline caching with service worker
