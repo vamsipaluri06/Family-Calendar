@@ -6011,6 +6011,27 @@
   color: var(--text-secondary);
 }
 
+:root.dark-theme .utility-quick-stats {
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+}
+
+:root.dark-theme .utility-quick-stats h3 {
+  color: var(--text-secondary);
+}
+
+:root.dark-theme .quick-stat-item {
+  background: var(--bg-secondary);
+}
+
+:root.dark-theme .quick-stat-item .stat-value {
+  color: var(--text-primary);
+}
+
+:root.dark-theme .quick-stat-item .stat-label {
+  color: var(--text-secondary);
+}
+
 /* Credit Cards Dark Theme */
 :root.dark-theme .credit-cards-page {
   background: transparent;
