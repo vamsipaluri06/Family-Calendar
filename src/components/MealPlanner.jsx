@@ -32,6 +32,12 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal, viewMo
     return dates;
   }, [selectedDate]);
 
+  // Check if current week contains today
+  const isViewingCurrentWeek = useMemo(() => {
+    const todayStr = formatDateLocal(new Date());
+    return weekDates.includes(todayStr);
+  }, [weekDates]);
+
   const handleGenerateGroceryList = async () => {
     setGeneratingGrocery(true);
     try {
@@ -87,9 +93,11 @@ function MealPlanner({ selectedDate, onDateSelect, onAddMeal, onEditMeal, viewMo
             {new Date(weekDates[6] + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </span>
           <button className="nav-arrow" onClick={() => navigateWeek(1)}>→</button>
-          <button className="today-btn" onClick={() => onDateSelect(formatDateLocal(new Date()))}>
-            Today
-          </button>
+          {!isViewingCurrentWeek && (
+            <button className="today-btn" onClick={() => onDateSelect(formatDateLocal(new Date()))}>
+              Today
+            </button>
+          )}
         </div>
       )}
 

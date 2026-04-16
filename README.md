@@ -2,7 +2,7 @@
 
 A beautiful, feature-rich family calendar application with meal planning, grocery lists, expense tracking, and member authentication. Built with React and designed with a stunning rainbow gradient theme.
 
-**Current Version: 2.3.0** | [View Changelog](#-changelog)
+**Current Version: 2.4.0** | [View Changelog](#-changelog)
 
 ## ✨ Features
 
@@ -27,7 +27,9 @@ A beautiful, feature-rich family calendar application with meal planning, grocer
 - 💳 **Credit Cards** - Track rewards and payment due dates
 - 🏠 **Monthly Utilities** - Track Rent, Electricity, Internet, Mobile bills
 - 💵 **Expense Tracking** - Log expenses by store with full history
+- 🍴 **Restaurant Expenses** - Separate tab for tracking dining out (v2.4.0)
 - 📊 **Expense Pie Chart** - Visual donut chart with store breakdown (v2.3.0)
+- ✨ **Lazy Load Chart** - Smooth animated entrance with spinning skeleton (v2.4.0)
 - 📈 **Monthly Details** - Click month total to see all expenses
 - 📉 **Yearly Breakdown** - Click year total to see monthly totals
 
@@ -42,6 +44,8 @@ A beautiful, feature-rich family calendar application with meal planning, grocer
 - 🌈 **Rainbow Theme** - Animated gradient backgrounds throughout the app
 - ✨ **Glassmorphism** - Frosted glass effects on cards and containers
 - 🎨 **Beautiful Animations** - Smooth transitions and hover effects
+- 🎯 **Bounce Effects** - Playful tap feedback on mobile navigation (v2.4.0)
+- 📱 **Staggered Animations** - Cards cascade in smoothly on page load (v2.4.0)
 - ⏰ **Live Clock** - Real-time clock and date display in the header
 
 ## 🚀 Quick Start
@@ -216,6 +220,16 @@ const FAMILY_MEMBERS = [
 
 ## 📝 Changelog
 
+### v2.4.0 (April 16, 2026)
+- 🍴 **Restaurant Expenses** - New tab in Grocery section for tracking dining out
+- 🎯 **Bounce Animations** - Playful tap feedback on mobile bottom navigation
+- 📱 **Staggered Card Animations** - Store cards cascade in when opening Grocery tab
+- 🍽️ **Meal Card Animations** - Breakfast, Lunch, Snack, Dinner slide in smoothly
+- 💰 **Expense Tab Animations** - Header, cards, and chart animate in sequence
+- ✨ **Lazy Load Pie Chart** - 2.5s delay with colorful spinning skeleton loader
+- 🌈 **Conic Gradient Loader** - Multi-color spinning rings during chart load
+- 🎨 **Pop-in Chart Animation** - Bouncy entrance when pie chart appears
+
 ### v2.3.0 (April 15, 2026)
 - 📊 **Expense Pie Chart** - Visual donut chart showing spending breakdown by store
 - 📅 **Calendar Navigation** - Inline "< April >" style with arrows side by side
@@ -257,3 +271,6 @@ const FAMILY_MEMBERS = [
 ## �📝 License
 
 Free for personal use. Built with ❤️ for families.
+## 🎨 Icon Attribution
+
+- Restaurant icon by [Gan Khoon Lay](https://thenounproject.com/creator/leremy/) from [The Noun Project](https://thenounproject.com/icon/restaurant-642040/)

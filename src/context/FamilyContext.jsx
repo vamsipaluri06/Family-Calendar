@@ -82,6 +82,7 @@ export function FamilyProvider({ children }) {
   const [meals, setMeals] = useState({});
   const [groceryItems, setGroceryItems] = useState([]);
   const [storeExpenses, setStoreExpenses] = useState([]);
+  const [restaurantExpenses, setRestaurantExpenses] = useState([]);
   const [familyMembers, setFamilyMembers] = useState(DEFAULT_FAMILY_MEMBERS);
   const [creditCards, setCreditCards] = useState([]);
   const [utilityBills, setUtilityBills] = useState([]);
@@ -185,6 +186,21 @@ export function FamilyProvider({ children }) {
         }
       });
 
+      // Listen to restaurant expenses
+      const restaurantExpensesRef = ref(db, 'restaurantExpenses');
+      const unsubRestaurantExpenses = onValue(restaurantExpensesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const expensesArray = Object.entries(data).map(([id, expense]) => ({
+            ...expense,
+            id
+          }));
+          setRestaurantExpenses(expensesArray);
+        } else {
+          setRestaurantExpenses([]);
+        }
+      });
+
       return () => {
         unsubEvents();
         unsubMeals();
@@ -193,6 +209,7 @@ export function FamilyProvider({ children }) {
         unsubExpenses();
         unsubCreditCards();
         unsubUtilityBills();
+        unsubRestaurantExpenses();
       };
     } else {
       // Fallback to localStorage
@@ -203,6 +220,7 @@ export function FamilyProvider({ children }) {
       const savedExpenses = localStorage.getItem('familyCalendarExpenses');
       const savedCreditCards = localStorage.getItem('familyCalendarCreditCards');
       const savedUtilityBills = localStorage.getItem('familyCalendarUtilityBills');
+      const savedRestaurantExpenses = localStorage.getItem('familyCalendarRestaurantExpenses');
       
       if (savedEvents) setEvents(JSON.parse(savedEvents));
       if (savedMeals) setMeals(JSON.parse(savedMeals));
@@ -211,6 +229,7 @@ export function FamilyProvider({ children }) {
       if (savedExpenses) setStoreExpenses(JSON.parse(savedExpenses));
       if (savedCreditCards) setCreditCards(JSON.parse(savedCreditCards));
       if (savedUtilityBills) setUtilityBills(JSON.parse(savedUtilityBills));
+      if (savedRestaurantExpenses) setRestaurantExpenses(JSON.parse(savedRestaurantExpenses));
       
       setLoading(false);
     }
@@ -226,8 +245,9 @@ export function FamilyProvider({ children }) {
       localStorage.setItem('familyCalendarExpenses', JSON.stringify(storeExpenses));
       localStorage.setItem('familyCalendarCreditCards', JSON.stringify(creditCards));
       localStorage.setItem('familyCalendarUtilityBills', JSON.stringify(utilityBills));
+      localStorage.setItem('familyCalendarRestaurantExpenses', JSON.stringify(restaurantExpenses));
     }
-  }, [events, meals, groceryItems, familyMembers, storeExpenses, creditCards, utilityBills, isFirebaseConnected, loading]);
+  }, [events, meals, groceryItems, familyMembers, storeExpenses, creditCards, utilityBills, restaurantExpenses, isFirebaseConnected, loading]);
 
   // Helper function to generate recurring event dates
   const generateRecurringDates = (startDate, endDate, recurringType) => {
@@ -576,6 +596,50 @@ export function FamilyProvider({ children }) {
     return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
   };
 
+  // Restaurant expense functions
+  const addRestaurantExpense = async (expense) => {
+    // expense: { restaurantName, amount, date }
+    if (db) {
+      try {
+        const expensesRef = ref(db, 'restaurantExpenses');
+        await push(expensesRef, { ...expense, createdAt: Date.now() });
+      } catch (error) {
+        console.error('Firebase error:', error);
+        // Fall back to localStorage if Firebase fails
+        const newExpense = { ...expense, id: Date.now().toString(), createdAt: Date.now() };
+        setRestaurantExpenses(prev => [...prev, newExpense]);
+      }
+    } else {
+      const newExpense = { ...expense, id: Date.now().toString(), createdAt: Date.now() };
+      setRestaurantExpenses(prev => [...prev, newExpense]);
+    }
+  };
+
+  const removeRestaurantExpense = async (id) => {
+    if (db) {
+      const expenseRef = ref(db, `restaurantExpenses/${id}`);
+      await remove(expenseRef);
+    } else {
+      setRestaurantExpenses(prev => prev.filter(e => e.id !== id));
+    }
+  };
+
+  const getRestaurantMonthlyTotal = (year, month) => {
+    const expenses = restaurantExpenses.filter(e => {
+      const expenseDate = new Date(e.date);
+      return expenseDate.getFullYear() === year && expenseDate.getMonth() === month;
+    });
+    return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  };
+
+  const getRestaurantAnnualTotal = (year) => {
+    const expenses = restaurantExpenses.filter(e => {
+      const expenseDate = new Date(e.date);
+      return expenseDate.getFullYear() === year;
+    });
+    return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+  };
+
   // Utility bill functions
   const addUtilityBill = async (bill) => {
     // bill: { utilityId, amount, date, note?, isPaid? }
@@ -790,6 +854,7 @@ export function FamilyProvider({ children }) {
       meals,
       groceryItems,
       storeExpenses,
+      restaurantExpenses,
       creditCards,
       utilityBills,
       loading,
@@ -828,6 +893,12 @@ export function FamilyProvider({ children }) {
       getMonthlyTotal,
       getAnnualTotal,
       getAllStoresAnnualTotal,
+
+      // Restaurant expense functions
+      addRestaurantExpense,
+      removeRestaurantExpense,
+      getRestaurantMonthlyTotal,
+      getRestaurantAnnualTotal,
 
       // Utility bill functions
       addUtilityBill,

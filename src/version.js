@@ -1,8 +1,20 @@
 // App version and changelog
-export const APP_VERSION = '2.3.0';
-export const BUILD_DATE = '2026-04-15';
+export const APP_VERSION = '2.4.0';
+export const BUILD_DATE = '2026-04-16';
 
 export const CHANGELOG = [
+  {
+    version: '2.4.0',
+    date: '2026-04-16',
+    changes: [
+      '🍴 Restaurant Expenses - New tab for tracking dining out',
+      '🎯 Bounce Animations - Playful tap feedback on mobile nav',
+      '📱 Staggered Card Animations - Store/meal cards cascade in',
+      '💰 Expense Tab Animations - Elements animate in sequence',
+      '✨ Lazy Load Pie Chart - Colorful spinning skeleton loader',
+      '🌈 Pop-in Chart Animation - Bouncy entrance effect'
+    ]
+  },
   {
     version: '2.3.0',
     date: '2026-04-15',

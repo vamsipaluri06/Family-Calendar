@@ -41,6 +41,20 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
   const [isDarkMode, setIsDarkMode] = useState(() => 
     document.documentElement.classList.contains('dark-theme')
   );
+  const [currentViewDate, setCurrentViewDate] = useState(new Date());
+
+  // Check if currently viewing today's date (same month and year for month view)
+  const isViewingToday = (() => {
+    const today = new Date();
+    return currentViewDate.getMonth() === today.getMonth() && 
+           currentViewDate.getFullYear() === today.getFullYear();
+  })();
+
+  // Handle calendar view date changes (month navigation)
+  const handleDatesSet = (dateInfo) => {
+    // Use the start of the visible range to determine current view
+    setCurrentViewDate(dateInfo.view.currentStart);
+  };
 
   // Listen for theme changes
   useEffect(() => {
@@ -295,6 +309,7 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
           select={handleSelect}
           dayCellContent={dayCellContent}
           dayCellDidMount={handleDayCellDidMount}
+          datesSet={handleDatesSet}
           eventDisplay="block"
           dayMaxEvents={5}
           weekends={true}
@@ -307,19 +322,21 @@ function Calendar({ selectedDate, onDateSelect, onEventClick, onAddEvent }) {
           }}
         />
 
-        {/* Today button centered below month navigation */}
-        <div className="calendar-today-row">
-          <button 
-            className="calendar-today-btn"
-            onClick={() => {
-              if (calendarRef.current) {
-                calendarRef.current.getApi().today();
-              }
-            }}
-          >
-            Today
-          </button>
-        </div>
+        {/* Today button centered below month navigation - only shown when not viewing current month */}
+        {!isViewingToday && (
+          <div className="calendar-today-row">
+            <button 
+              className="calendar-today-btn"
+              onClick={() => {
+                if (calendarRef.current) {
+                  calendarRef.current.getApi().today();
+                }
+              }}
+            >
+              Today
+            </button>
+          </div>
+        )}
 
         {/* Meal Popup - appears when food bowl icon is clicked */}
         {mealPopupDate && (

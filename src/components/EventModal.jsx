@@ -1,9 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useFamily } from '../context/FamilyContext';
+import { useAuth } from '../context/AuthContext';
 import TimePicker from './TimePicker';
 
 function EventModal({ event, selectedDate, onClose }) {
   const { addEvent, updateEvent, deleteEvent, FAMILY_MEMBERS } = useFamily();
+  const { currentUser } = useAuth();
+  
+  // Get the logged-in user's member ID (regular users have 'id', admin might have 'memberId')
+  const loggedInMemberId = currentUser?.id || currentUser?.memberId || null;
+  
+  // Sort family members: logged-in user first, then others in original order
+  const sortedFamilyMembers = useMemo(() => {
+    if (!loggedInMemberId) return FAMILY_MEMBERS;
+    
+    const loggedInMember = FAMILY_MEMBERS.find(m => m.id === loggedInMemberId);
+    const otherMembers = FAMILY_MEMBERS.filter(m => m.id !== loggedInMemberId);
+    
+    return loggedInMember 
+      ? [loggedInMember, ...otherMembers] 
+      : FAMILY_MEMBERS;
+  }, [FAMILY_MEMBERS, loggedInMemberId]);
   
   // Calculate default recurring end date (3 months from now)
   const getDefaultRecurringEndDate = () => {
@@ -33,6 +50,14 @@ function EventModal({ event, selectedDate, onClose }) {
   const defaultStartTime = getCurrentTime();
   const defaultEndTime = getEndTime(defaultStartTime);
 
+  // Determine default member: logged-in user first, fallback to first family member
+  const getDefaultMemberIds = () => {
+    if (loggedInMemberId && FAMILY_MEMBERS.some(m => m.id === loggedInMemberId)) {
+      return [loggedInMemberId];
+    }
+    return [FAMILY_MEMBERS[0]?.id].filter(Boolean);
+  };
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -41,7 +66,7 @@ function EventModal({ event, selectedDate, onClose }) {
     end: selectedDate,
     endTime: defaultEndTime,
     allDay: false,
-    memberIds: [FAMILY_MEMBERS[0].id], // Array for multiple family members
+    memberIds: getDefaultMemberIds(), // Array for multiple family members (logged-in user by default)
     recurring: 'none', // 'none', 'daily', 'weekly', 'monthly', 'annually'
     recurringEndDate: getDefaultRecurringEndDate(), // End date for recurring events
     reminder: '30', // minutes before
@@ -181,6 +206,11 @@ function EventModal({ event, selectedDate, onClose }) {
   };
 
   const handleMemberToggle = (memberId) => {
+    // Prevent unchecking the logged-in user (they must always be a participant)
+    if (memberId === loggedInMemberId && formData.memberIds.includes(memberId)) {
+      return; // Cannot uncheck logged-in user
+    }
+    
     setFormData(prev => {
       const currentIds = prev.memberIds;
       if (currentIds.includes(memberId)) {
@@ -222,29 +252,40 @@ function EventModal({ event, selectedDate, onClose }) {
           <div className="form-group">
             <label>Family Members</label>
             <div className="member-picker">
-              {FAMILY_MEMBERS.map(member => (
-                <label 
-                  key={member.id} 
-                  className={`member-chip ${formData.memberIds.includes(member.id) ? 'selected' : ''}`}
-                  style={{ 
-                    '--member-color': member.color,
-                    borderColor: formData.memberIds.includes(member.id) ? member.color : 'transparent'
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={formData.memberIds.includes(member.id)}
-                    onChange={() => handleMemberToggle(member.id)}
-                  />
-                  <span 
-                    className="member-dot"
-                    style={{ backgroundColor: member.color }}
-                  ></span>
-                  <span className="member-name">{member.name}</span>
-                </label>
-              ))}
+              {sortedFamilyMembers.map(member => {
+                const isLoggedInUser = member.id === loggedInMemberId;
+                const isSelected = formData.memberIds.includes(member.id);
+                
+                return (
+                  <label 
+                    key={member.id} 
+                    className={`member-chip ${isSelected ? 'selected' : ''} ${isLoggedInUser ? 'logged-in-user' : ''}`}
+                    style={{ 
+                      '--member-color': member.color,
+                      borderColor: isSelected ? member.color : 'transparent'
+                    }}
+                    title={isLoggedInUser ? 'You are automatically included as a participant' : ''}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleMemberToggle(member.id)}
+                      disabled={isLoggedInUser}
+                    />
+                    <span 
+                      className="member-dot"
+                      style={{ backgroundColor: member.color }}
+                    ></span>
+                    <span className="member-name">
+                      {member.name}
+                      {isLoggedInUser && <span className="you-badge">(You)</span>}
+                    </span>
+                    {isLoggedInUser && <span className="lock-icon">🔒</span>}
+                  </label>
+                );
+              })}
             </div>
-            <p className="form-hint">Select one or more family members</p>
+            <p className="form-hint">Select one or more family members. You are always included.</p>
           </div>
 
           <div className="form-row">

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useFamily } from '../context/FamilyContext';
 import ExpenseModal from './ExpenseModal';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
@@ -22,9 +22,12 @@ const GROCERY_STORES = [
 function ExpenseSummary() {
   const { 
     storeExpenses,
+    restaurantExpenses,
     getMonthlyTotal,
     getAnnualTotal,
-    getAllStoresAnnualTotal
+    getAllStoresAnnualTotal,
+    getRestaurantMonthlyTotal,
+    getRestaurantAnnualTotal
   } = useFamily();
   
   const [selectedStore, setSelectedStore] = useState(null);
@@ -33,6 +36,15 @@ function ExpenseSummary() {
   const [showMonthDetails, setShowMonthDetails] = useState(false);
   const [showYearDetails, setShowYearDetails] = useState(false);
   const [showStoreList, setShowStoreList] = useState(false);
+  const [chartLoaded, setChartLoaded] = useState(false);
+
+  // Lazy load the pie chart with delay for smooth animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setChartLoaded(true);
+    }, 2500); // 2.5 second delay
+    return () => clearTimeout(timer);
+  }, []);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -57,35 +69,69 @@ function ExpenseSummary() {
     })).sort((a, b) => b.monthlyTotal - a.monthlyTotal);
   }, [storeExpenses, viewYear, viewMonth]);
 
-  // Get all expenses for the selected month
+  // Restaurant totals
+  const restaurantMonthlyTotal = getRestaurantMonthlyTotal(viewYear, viewMonth);
+  const restaurantAnnualTotal = getRestaurantAnnualTotal(viewYear);
+
+  // Get all expenses for the selected month (including restaurants)
   const monthlyExpenses = useMemo(() => {
-    return storeExpenses
+    const storeExp = storeExpenses
       .filter(e => {
         const expenseDate = new Date(e.date);
         return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === viewMonth;
       })
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [storeExpenses, viewYear, viewMonth]);
+      .map(e => ({ ...e, type: 'store' }));
+    
+    const restaurantExp = restaurantExpenses
+      .filter(e => {
+        const expenseDate = new Date(e.date);
+        return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === viewMonth;
+      })
+      .map(e => ({ ...e, type: 'restaurant' }));
+    
+    return [...storeExp, ...restaurantExp].sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [storeExpenses, restaurantExpenses, viewYear, viewMonth]);
 
-  const totalMonthly = storeStats.reduce((sum, s) => sum + s.monthlyTotal, 0);
-  const totalAnnual = getAllStoresAnnualTotal(viewYear);
+  const totalMonthly = storeStats.reduce((sum, s) => sum + s.monthlyTotal, 0) + restaurantMonthlyTotal;
+  const totalAnnual = getAllStoresAnnualTotal(viewYear) + restaurantAnnualTotal;
 
-  // Get totals for each month of the year
+  // Combined stats for pie chart (stores + restaurants)
+  const allExpenseStats = useMemo(() => {
+    const stats = [...storeStats];
+    if (restaurantMonthlyTotal > 0 || restaurantAnnualTotal > 0) {
+      stats.push({
+        id: 'restaurants',
+        name: 'Restaurants',
+        logo: `${BASE_URL}Logos/restaurant.png`,
+        color: '#FF6B6B',
+        monthlyTotal: restaurantMonthlyTotal,
+        annualTotal: restaurantAnnualTotal
+      });
+    }
+    return stats.sort((a, b) => b.monthlyTotal - a.monthlyTotal);
+  }, [storeStats, restaurantMonthlyTotal, restaurantAnnualTotal]);
+
+  // Get totals for each month of the year (including restaurants)
   const yearlyMonthlyTotals = useMemo(() => {
     return months.map((monthName, monthIndex) => {
-      const monthExpenses = storeExpenses.filter(e => {
+      const storeMonthExpenses = storeExpenses.filter(e => {
         const expenseDate = new Date(e.date);
         return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === monthIndex;
       });
-      const total = monthExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+      const restaurantMonthExpenses = restaurantExpenses.filter(e => {
+        const expenseDate = new Date(e.date);
+        return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === monthIndex;
+      });
+      const storeTotal = storeMonthExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+      const restaurantTotal = restaurantMonthExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
       return {
         month: monthName,
         monthIndex,
-        total,
-        expenseCount: monthExpenses.length
+        total: storeTotal + restaurantTotal,
+        expenseCount: storeMonthExpenses.length + restaurantMonthExpenses.length
       };
     });
-  }, [storeExpenses, viewYear]);
+  }, [storeExpenses, restaurantExpenses, viewYear]);
 
   return (
     <div className="expense-summary">
@@ -148,18 +194,30 @@ function ExpenseSummary() {
 
       {/* Store Breakdown - Pie Chart */}
       <div className="store-expense-chart">
-        {storeStats.filter(s => s.monthlyTotal > 0).length === 0 ? (
+        {allExpenseStats.filter(s => s.monthlyTotal > 0).length === 0 ? (
           <p className="no-expenses" style={{ textAlign: 'center', padding: '2rem' }}>No expenses recorded for {months[viewMonth]}</p>
+        ) : !chartLoaded ? (
+          /* Loading skeleton while chart loads */
+          <div className="pie-chart-loading">
+            <div className="pie-chart-skeleton">
+              <div className="skeleton-ring"></div>
+              <div className="skeleton-center">
+                <div className="skeleton-text"></div>
+                <div className="skeleton-text"></div>
+              </div>
+            </div>
+            <p className="loading-text">Loading chart</p>
+          </div>
         ) : (
           <div 
-            className="pie-chart-container" 
+            className="pie-chart-container pie-chart-fade-in" 
             onClick={() => setShowStoreList(true)}
             style={{ cursor: 'pointer', position: 'relative' }}
           >
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie
-                  data={storeStats.filter(s => s.monthlyTotal > 0).map(store => ({
+                  data={allExpenseStats.filter(s => s.monthlyTotal > 0).map(store => ({
                     name: store.name,
                     value: store.monthlyTotal,
                     color: store.color,
@@ -173,8 +231,13 @@ function ExpenseSummary() {
                   dataKey="value"
                   stroke="rgba(255,255,255,0.8)"
                   strokeWidth={2}
+                  animationBegin={200}
+                  animationDuration={1200}
+                  animationEasing="ease-out"
+                  startAngle={90}
+                  endAngle={-270}
                 >
-                  {storeStats.filter(s => s.monthlyTotal > 0).map((store, index) => (
+                  {allExpenseStats.filter(s => s.monthlyTotal > 0).map((store, index) => (
                     <Cell 
                       key={`cell-${index}`} 
                       fill={store.color}
@@ -226,24 +289,27 @@ function ExpenseSummary() {
         <div className="modal-overlay" onClick={() => setShowStoreList(false)}>
           <div className="expense-modal month-detail-modal" onClick={e => e.stopPropagation()}>
             <div className="expense-modal-header">
-              <h2>🏪 Store Breakdown - {months[viewMonth]} {viewYear}</h2>
+              <h2>🏪 Expense Breakdown - {months[viewMonth]} {viewYear}</h2>
               <button className="modal-close" onClick={() => setShowStoreList(false)}>×</button>
             </div>
             
             <div className="month-expense-summary">
-              <span className="expense-count">{storeStats.filter(s => s.monthlyTotal > 0).length} store{storeStats.filter(s => s.monthlyTotal > 0).length !== 1 ? 's' : ''}</span>
+              <span className="expense-count">{allExpenseStats.filter(s => s.monthlyTotal > 0).length} categor{allExpenseStats.filter(s => s.monthlyTotal > 0).length !== 1 ? 'ies' : 'y'}</span>
               <span className="expense-total">{formatCurrency(totalMonthly)}</span>
             </div>
 
             <div className="store-expense-list">
-              {storeStats.map(store => (
+              {allExpenseStats.map(store => (
                 <div 
                   key={store.id} 
                   className="store-expense-row"
                   onClick={() => {
-                    setSelectedStore(store);
-                    setShowStoreList(false);
+                    if (store.id !== 'restaurants') {
+                      setSelectedStore(store);
+                      setShowStoreList(false);
+                    }
                   }}
+                  style={{ cursor: store.id !== 'restaurants' ? 'pointer' : 'default' }}
                 >
                   <div className="store-info">
                     {store.logo ? (
@@ -295,7 +361,9 @@ function ExpenseSummary() {
                 <p className="no-expenses">No expenses recorded for {months[viewMonth]}</p>
               ) : (
                 monthlyExpenses.map(expense => {
-                  const store = GROCERY_STORES.find(s => s.id === expense.storeId);
+                  const store = expense.type === 'restaurant' 
+                    ? { name: expense.restaurantName, logo: `${BASE_URL}Logos/restaurant.png`, color: '#FF6B6B' }
+                    : GROCERY_STORES.find(s => s.id === expense.storeId);
                   const expenseDate = new Date(expense.date);
                   return (
                     <div key={expense.id} className="month-expense-item">

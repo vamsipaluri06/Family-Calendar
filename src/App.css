@@ -167,6 +167,24 @@
   grid-template-columns: 100px repeat(7, 1fr);
   gap: 1px;
   background: var(--border-color);
+  animation: meal-row-enter 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
+}
+
+/* Staggered delays for meal rows (Breakfast, Lunch, Snack, Dinner) */
+.meal-row:nth-child(2) { animation-delay: 0.08s; }
+.meal-row:nth-child(3) { animation-delay: 0.16s; }
+.meal-row:nth-child(4) { animation-delay: 0.24s; }
+.meal-row:nth-child(5) { animation-delay: 0.32s; }
+
+@keyframes meal-row-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .meal-cell {
@@ -243,16 +261,40 @@
   gap: 16px;
 }
 
+/* Meal card entrance animation */
 .day-meal-card {
   background: var(--bg-secondary);
   border-radius: 8px;
   padding: 16px;
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, transform 0.2s;
+  animation: meal-card-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+/* Staggered delays for meal cards (Breakfast, Lunch, Snack, Dinner) */
+.day-meal-card:nth-child(1) { animation-delay: 0.05s; }
+.day-meal-card:nth-child(2) { animation-delay: 0.12s; }
+.day-meal-card:nth-child(3) { animation-delay: 0.19s; }
+.day-meal-card:nth-child(4) { animation-delay: 0.26s; }
+
+@keyframes meal-card-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 .day-meal-card:hover {
   box-shadow: var(--shadow-md);
+  transform: translateX(4px);
+}
+
+.day-meal-card:active {
+  transform: scale(0.98);
 }
 
 .day-meal-card.has-meal {
@@ -629,6 +671,7 @@
   margin-top: 24px;
 }
 
+/* Store card entrance animation */
 .store-card {
   position: relative;
   display: flex;
@@ -642,12 +685,41 @@
   cursor: pointer;
   transition: all 0.3s ease;
   min-height: 120px;
+  animation: store-card-enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+/* Staggered delays for store cards */
+.store-card:nth-child(1) { animation-delay: 0.05s; }
+.store-card:nth-child(2) { animation-delay: 0.1s; }
+.store-card:nth-child(3) { animation-delay: 0.15s; }
+.store-card:nth-child(4) { animation-delay: 0.2s; }
+.store-card:nth-child(5) { animation-delay: 0.25s; }
+.store-card:nth-child(6) { animation-delay: 0.3s; }
+.store-card:nth-child(7) { animation-delay: 0.35s; }
+.store-card:nth-child(8) { animation-delay: 0.4s; }
+.store-card:nth-child(9) { animation-delay: 0.45s; }
+.store-card:nth-child(10) { animation-delay: 0.5s; }
+
+@keyframes store-card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .store-card:hover {
   border-color: var(--store-color, var(--primary));
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.store-card:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .store-logo-container {
@@ -995,6 +1067,190 @@
 .assign-btn:hover {
   transform: scale(1.1);
   opacity: 0.9;
+}
+
+/* Grocery Tab Toggle */
+.grocery-tab-toggle {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 4px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  background: var(--bg-hover);
+}
+
+.tab-btn.active {
+  background: white;
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Restaurant Icon Styles */
+.restaurant-icon {
+  height: 28px;
+  width: auto;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.tab-icon {
+  height: 18px;
+  width: auto;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+/* Restaurant Section Styles */
+.restaurant-summary-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.restaurant-expense-form {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.restaurant-expense-form .form-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.restaurant-expense-form .form-row:first-child {
+  margin-bottom: 12px;
+}
+
+.restaurant-expense-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.restaurant-expense-form .form-group.flex-grow {
+  flex: 1;
+}
+
+.restaurant-expense-form label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.restaurant-expense-form input {
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s ease;
+}
+
+.restaurant-expense-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.restaurant-expenses-section {
+  margin-top: 24px;
+}
+
+.restaurant-expense-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.restaurant-expense-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  gap: 12px;
+}
+
+.restaurant-expense-item:last-child {
+  border-bottom: none;
+}
+
+.restaurant-expense-item .expense-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.restaurant-expense-item .expense-restaurant-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.restaurant-expense-item .expense-date {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.restaurant-expense-item .expense-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.restaurant-expense-item .expense-amount {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+/* Restaurant Form Button */
+.restaurant-expense-form .btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.restaurant-expense-form .btn-primary {
+  background: #FF6B6B;
+  color: white;
+}
+
+.restaurant-expense-form .btn-primary:hover:not(:disabled) {
+  background: #ff5252;
+  transform: translateY(-1px);
+}
+
+.restaurant-expense-form .btn-primary:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
 }
 
 /* Store Items View */
@@ -1393,12 +1649,25 @@
 .expense-summary-header h2 {
   font-size: 24px;
   margin: 0;
+  animation: expense-header-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+@keyframes expense-header-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .expense-summary .expense-month-selector {
   background: transparent;
   padding: 0;
   justify-content: flex-start;
+  animation: expense-header-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s backwards;
 }
 
 .expense-totals {
@@ -1408,12 +1677,29 @@
   margin-bottom: 24px;
 }
 
+/* Expense card entrance animation */
 .total-card {
   padding: 20px;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  animation: expense-card-enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+/* Staggered delays for expense cards */
+.total-card.monthly { animation-delay: 0.05s; }
+.total-card.annual { animation-delay: 0.15s; }
+
+@keyframes expense-card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(25px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .total-card.monthly {
@@ -1445,6 +1731,11 @@
 .total-card.clickable:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.total-card.clickable:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
 .total-card .click-hint {
@@ -1686,11 +1977,27 @@
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: expense-chart-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s backwards;
+}
+
+@keyframes expense-chart-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .store-expense-chart:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.store-expense-chart:active {
+  transform: scale(0.98);
 }
 
 .store-expense-chart h3 {
@@ -1762,6 +2069,195 @@
   font-size: 26px;
   font-weight: 700;
   color: var(--text-primary, #333);
+}
+
+/* Pie Chart Loading Skeleton */
+.pie-chart-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  min-height: 350px;
+}
+
+.pie-chart-skeleton {
+  position: relative;
+  width: 210px;
+  height: 210px;
+  animation: skeleton-glow 2s ease-in-out infinite;
+}
+
+@keyframes skeleton-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(66, 133, 244, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(66, 133, 244, 0.6));
+  }
+}
+
+.skeleton-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #e5e7eb 0deg,
+    #4285f4 60deg,
+    #34a853 120deg,
+    #fbbc04 180deg,
+    #ea4335 240deg,
+    #9c27b0 300deg,
+    #e5e7eb 360deg
+  );
+  box-sizing: border-box;
+  animation: skeleton-spin 2s linear infinite;
+  mask: radial-gradient(farthest-side, transparent calc(100% - 40px), #fff calc(100% - 40px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 40px), #fff calc(100% - 40px));
+}
+
+.skeleton-ring::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 180deg,
+    #e5e7eb 0deg,
+    #FF6B6B 90deg,
+    #005DAA 180deg,
+    #FF9900 270deg,
+    #e5e7eb 360deg
+  );
+  animation: skeleton-spin 3s linear infinite reverse;
+  mask: radial-gradient(farthest-side, transparent calc(100% - 32px), #fff calc(100% - 32px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 32px), #fff calc(100% - 32px));
+  opacity: 0.6;
+}
+
+.skeleton-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  background: var(--bg-primary, white);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.skeleton-text {
+  width: 50px;
+  height: 16px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: skeleton-shimmer 1.5s infinite;
+}
+
+.skeleton-text:last-child {
+  width: 30px;
+  height: 10px;
+  margin-top: 6px;
+}
+
+.loading-text {
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 500;
+  animation: loading-dots 1.5s ease-in-out infinite;
+}
+
+.loading-text::after {
+  content: '';
+  animation: dots 1.5s infinite;
+}
+
+@keyframes skeleton-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes loading-dots {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+  100% { content: ''; }
+}
+
+/* Pie Chart Fade In Animation */
+.pie-chart-fade-in {
+  animation: chart-pop-in 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes chart-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-10deg);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05) rotate(2deg);
+  }
+  70% {
+    transform: scale(0.95) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Pie center label animation */
+.pie-chart-fade-in .pie-center-label {
+  animation: center-pop 0.6s ease-out 0.5s both;
+}
+
+@keyframes center-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .chart-total-badge {
@@ -3172,6 +3668,39 @@
 
 .member-chip.selected .member-name {
   color: var(--text-primary);
+}
+
+/* Logged-in user member chip styling */
+.member-chip.logged-in-user {
+  position: relative;
+  cursor: default;
+}
+
+.member-chip.logged-in-user.selected {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+}
+
+.member-chip.logged-in-user input[type="checkbox"] {
+  display: none;
+}
+
+.you-badge {
+  font-size: 11px;
+  color: #22c55e;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.lock-icon {
+  font-size: 12px;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+
+.member-chip.logged-in-user:hover {
+  background: rgba(34, 197, 94, 0.15);
+  cursor: not-allowed;
 }
 
 .form-hint {
@@ -6212,6 +6741,39 @@
 
 :root.dark-theme .pie-chart-container:hover {
   background: linear-gradient(180deg, rgba(66, 133, 244, 0.05) 0%, rgba(66, 133, 244, 0.1) 100%);
+}
+
+:root.dark-theme .skeleton-ring {
+  background: conic-gradient(
+    from 0deg,
+    #3a3a3a 0deg,
+    #4285f4 60deg,
+    #34a853 120deg,
+    #fbbc04 180deg,
+    #ea4335 240deg,
+    #9c27b0 300deg,
+    #3a3a3a 360deg
+  );
+}
+
+:root.dark-theme .skeleton-ring::before {
+  background: conic-gradient(
+    from 180deg,
+    #3a3a3a 0deg,
+    #FF6B6B 90deg,
+    #005DAA 180deg,
+    #FF9900 270deg,
+    #3a3a3a 360deg
+  );
+}
+
+:root.dark-theme .skeleton-center {
+  background: var(--bg-primary);
+}
+
+:root.dark-theme .skeleton-text {
+  background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%);
+  background-size: 200% 100%;
 }
 
 :root.dark-theme .chart-click-hint {
