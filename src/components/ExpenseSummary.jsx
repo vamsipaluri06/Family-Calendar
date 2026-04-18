@@ -19,6 +19,9 @@ const GROCERY_STORES = [
   { id: 'misc', name: 'Miscellaneous', logo: null, emoji: '📦', color: '#6B7280' }
 ];
 
+// Helper to parse a YYYY-MM-DD string as local date (noon to avoid timezone shifts)
+const parseLocalDate = (dateStr) => new Date(dateStr + 'T12:00:00');
+
 function ExpenseSummary() {
   const { 
     storeExpenses,
@@ -77,19 +80,19 @@ function ExpenseSummary() {
   const monthlyExpenses = useMemo(() => {
     const storeExp = storeExpenses
       .filter(e => {
-        const expenseDate = new Date(e.date);
+        const expenseDate = parseLocalDate(e.date);
         return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === viewMonth;
       })
       .map(e => ({ ...e, type: 'store' }));
     
     const restaurantExp = restaurantExpenses
       .filter(e => {
-        const expenseDate = new Date(e.date);
+        const expenseDate = parseLocalDate(e.date);
         return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === viewMonth;
       })
       .map(e => ({ ...e, type: 'restaurant' }));
     
-    return [...storeExp, ...restaurantExp].sort((a, b) => new Date(b.date) - new Date(a.date));
+    return [...storeExp, ...restaurantExp].sort((a, b) => parseLocalDate(b.date) - parseLocalDate(a.date));
   }, [storeExpenses, restaurantExpenses, viewYear, viewMonth]);
 
   const totalMonthly = storeStats.reduce((sum, s) => sum + s.monthlyTotal, 0) + restaurantMonthlyTotal;
@@ -115,11 +118,11 @@ function ExpenseSummary() {
   const yearlyMonthlyTotals = useMemo(() => {
     return months.map((monthName, monthIndex) => {
       const storeMonthExpenses = storeExpenses.filter(e => {
-        const expenseDate = new Date(e.date);
+        const expenseDate = parseLocalDate(e.date);
         return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === monthIndex;
       });
       const restaurantMonthExpenses = restaurantExpenses.filter(e => {
-        const expenseDate = new Date(e.date);
+        const expenseDate = parseLocalDate(e.date);
         return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === monthIndex;
       });
       const storeTotal = storeMonthExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
@@ -364,7 +367,7 @@ function ExpenseSummary() {
                   const store = expense.type === 'restaurant' 
                     ? { name: expense.restaurantName, logo: `${BASE_URL}Logos/restaurant.png`, color: '#FF6B6B' }
                     : GROCERY_STORES.find(s => s.id === expense.storeId);
-                  const expenseDate = new Date(expense.date);
+                  const expenseDate = parseLocalDate(expense.date);
                   return (
                     <div key={expense.id} className="month-expense-item">
                       <div className="expense-date">

@@ -567,7 +567,7 @@ export function FamilyProvider({ children }) {
   const getStoreExpenses = (storeId, year, month) => {
     return storeExpenses.filter(e => {
       if (e.storeId !== storeId) return false;
-      const expenseDate = new Date(e.date);
+      const expenseDate = new Date(e.date + 'T12:00:00');
       if (year && expenseDate.getFullYear() !== year) return false;
       if (month !== undefined && expenseDate.getMonth() !== month) return false;
       return true;
@@ -582,7 +582,7 @@ export function FamilyProvider({ children }) {
   const getAnnualTotal = (storeId, year) => {
     const expenses = storeExpenses.filter(e => {
       if (e.storeId !== storeId) return false;
-      const expenseDate = new Date(e.date);
+      const expenseDate = new Date(e.date + 'T12:00:00');
       return expenseDate.getFullYear() === year;
     });
     return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
@@ -590,7 +590,7 @@ export function FamilyProvider({ children }) {
 
   const getAllStoresAnnualTotal = (year) => {
     const expenses = storeExpenses.filter(e => {
-      const expenseDate = new Date(e.date);
+      const expenseDate = new Date(e.date + 'T12:00:00');
       return expenseDate.getFullYear() === year;
     });
     return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
@@ -626,7 +626,7 @@ export function FamilyProvider({ children }) {
 
   const getRestaurantMonthlyTotal = (year, month) => {
     const expenses = restaurantExpenses.filter(e => {
-      const expenseDate = new Date(e.date);
+      const expenseDate = new Date(e.date + 'T12:00:00');
       return expenseDate.getFullYear() === year && expenseDate.getMonth() === month;
     });
     return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
@@ -634,7 +634,7 @@ export function FamilyProvider({ children }) {
 
   const getRestaurantAnnualTotal = (year) => {
     const expenses = restaurantExpenses.filter(e => {
-      const expenseDate = new Date(e.date);
+      const expenseDate = new Date(e.date + 'T12:00:00');
       return expenseDate.getFullYear() === year;
     });
     return expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);

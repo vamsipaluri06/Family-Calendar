@@ -1,8 +1,19 @@
 // App version and changelog
-export const APP_VERSION = '2.4.0';
-export const BUILD_DATE = '2026-04-16';
+export const APP_VERSION = '2.5.0';
+export const BUILD_DATE = '2026-04-18';
 
 export const CHANGELOG = [
+  {
+    version: '2.5.0',
+    date: '2026-04-18',
+    changes: [
+      '👤 Auto-Select Logged-in User - Automatically added as event participant with lock icon',
+      '🔒 Locked Participant - Logged-in user cannot be accidentally removed from events',
+      '📅 Smart Today Button - Hidden when already viewing current month/week',
+      '🐛 Fixed date-off-by-one bug in expense tracking (timezone fix)',
+      '🐛 Fixed restaurant expense date display shifting by one day'
+    ]
+  },
   {
     version: '2.4.0',
     date: '2026-04-16',

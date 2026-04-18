@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useFamily } from '../context/FamilyContext';
 
+// Helper to format date as YYYY-MM-DD in local time
+const formatDateLocal = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Helper to parse a YYYY-MM-DD string as local date (noon to avoid timezone shifts)
+const parseLocalDate = (dateStr) => new Date(dateStr + 'T12:00:00');
+
 function ExpenseModal({ store, onClose }) {
   const { 
     storeExpenses,
@@ -12,7 +23,7 @@ function ExpenseModal({ store, onClose }) {
   } = useFamily();
   
   const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(formatDateLocal(new Date()));
   const [note, setNote] = useState('');
   const [viewMonth, setViewMonth] = useState(new Date().getMonth());
   const [viewYear, setViewYear] = useState(new Date().getFullYear());
@@ -27,10 +38,10 @@ function ExpenseModal({ store, onClose }) {
     return storeExpenses
       .filter(e => {
         if (e.storeId !== store.id) return false;
-        const expenseDate = new Date(e.date);
+        const expenseDate = parseLocalDate(e.date);
         return expenseDate.getFullYear() === viewYear && expenseDate.getMonth() === viewMonth;
       })
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+      .sort((a, b) => parseLocalDate(b.date) - parseLocalDate(a.date));
   }, [storeExpenses, store.id, viewYear, viewMonth]);
 
   const monthlyTotal = getMonthlyTotal(store.id, viewYear, viewMonth);
@@ -51,7 +62,7 @@ function ExpenseModal({ store, onClose }) {
 
     setAmount('');
     setNote('');
-    setDate(new Date().toISOString().split('T')[0]);
+    setDate(formatDateLocal(new Date()));
   };
 
   const handleDelete = async (expenseId) => {
@@ -68,7 +79,7 @@ function ExpenseModal({ store, onClose }) {
   };
 
   const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
+    const date = parseLocalDate(dateStr);
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric',

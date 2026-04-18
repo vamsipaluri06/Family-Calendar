@@ -93,7 +93,10 @@ function GroceryList() {
   // Restaurant form state
   const [restaurantName, setRestaurantName] = useState('');
   const [restaurantAmount, setRestaurantAmount] = useState('');
-  const [restaurantDate, setRestaurantDate] = useState(new Date().toISOString().split('T')[0]);
+  const [restaurantDate, setRestaurantDate] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  });
 
   // Group items by store
   const itemsByStore = useMemo(() => {
@@ -148,7 +151,7 @@ function GroceryList() {
       return [];
     }
     return [...restaurantExpenses]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .sort((a, b) => new Date(b.date + 'T12:00:00') - new Date(a.date + 'T12:00:00'))
       .slice(0, 10);
   }, [restaurantExpenses]);
 
@@ -168,7 +171,8 @@ function GroceryList() {
 
       setRestaurantName('');
       setRestaurantAmount('');
-      setRestaurantDate(new Date().toISOString().split('T')[0]);
+      const now = new Date();
+      setRestaurantDate(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);
     } catch (error) {
       console.error('Error adding restaurant expense:', error);
     }
@@ -287,7 +291,7 @@ function GroceryList() {
                   <div className="expense-info">
                     <span className="expense-restaurant-name">{expense.restaurantName}</span>
                     <span className="expense-date">
-                      {new Date(expense.date).toLocaleDateString('en-US', { 
+                      {new Date(expense.date + 'T12:00:00').toLocaleDateString('en-US', { 
                         month: 'short', 
                         day: 'numeric',
                         year: 'numeric'

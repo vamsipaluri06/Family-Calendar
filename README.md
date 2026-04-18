@@ -2,17 +2,19 @@
 
 A beautiful, feature-rich family calendar application with meal planning, grocery lists, expense tracking, and member authentication. Built with React and designed with a stunning rainbow gradient theme.
 
-**Current Version: 2.4.0** | [View Changelog](#-changelog)
+**Current Version: 2.5.0** | [View Changelog](#-changelog)
 
 ## ✨ Features
 
 ### Core Features
 - 📅 **Calendar Views** - Day, Week, Month views powered by FullCalendar
 - ⬅️➡️ **Inline Navigation** - Clean "< April >" style month navigation (v2.3.0)
+- 📅 **Smart Today Button** - Only shown when viewing a different date/week (v2.5.0)
 - ✅ **Event Completion** - Mark events as done with checkbox & strikethrough
 - 🍽️ **Meal Planner** - Plan Breakfast, Lunch, Snack & Dinner for each day
 - 🛒 **Grocery List** - Auto-generate shopping lists from meal ingredients
 - 👪 **Family Members** - Color-coded events and activities for 3 family members
+- 👤 **Auto-Select Participant** - Logged-in user auto-added to new events with lock (v2.5.0)
 - 🔄 **Sync Across Devices** - Real-time sync with Firebase Realtime Database
 - 📱 **Mobile-First Design** - Fully responsive with bottom navigation for phones
 - 🌙 **Dark Theme** - Toggle between light and dark mode
@@ -219,6 +221,13 @@ const FAMILY_MEMBERS = [
 - **[TECHNICAL.md](TECHNICAL.md)** - Detailed technical architecture & implementation
 
 ## 📝 Changelog
+
+### v2.5.0 (April 18, 2026)
+- 👤 **Auto-Select Logged-in User** - Automatically added as event participant with "(You)" badge and lock icon
+- 🔒 **Locked Participant** - Logged-in user cannot be accidentally removed from events
+- 📅 **Smart Today Button** - Calendar hides Today button when viewing current month; Meal Planner hides it when viewing current week
+- 🐛 **Expense Date Fix** - Fixed timezone bug causing dates to shift by one day in all expense tracking (groceries & restaurants)
+- 🐛 **Restaurant Date Fix** - Fixed date display and default date initialization in restaurant expenses
 
 ### v2.4.0 (April 16, 2026)
 - 🍴 **Restaurant Expenses** - New tab in Grocery section for tracking dining out
